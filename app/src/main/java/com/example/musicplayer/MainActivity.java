@@ -11,12 +11,14 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.example.musicplayer.service.MediaPlayerService;
+import com.example.musicplayer.utilities.ServicePreferences;
 
 import java.util.zip.Inflater;
 
 public class MainActivity extends AppCompatActivity {
     private MediaPlayerService mMediaPlayerService;
-    private boolean mServiceBound = false;
+    private boolean mServiceBound =
+            ServicePreferences.getServiceBound(MainActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +34,10 @@ public class MainActivity extends AppCompatActivity {
                     (MediaPlayerService.LocalBinder) service;
             mMediaPlayerService = binder.getService();
             mServiceBound = true;
-            Toast.makeText(MainActivity.this, "Service bound", Toast.LENGTH_LONG).show();
+            ServicePreferences.setServiceBound(MainActivity.this,mServiceBound);
+
+            Toast.makeText(MainActivity.this,
+                    "Service bound", Toast.LENGTH_LONG).show();
 
         }
 
@@ -40,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceDisconnected(ComponentName name) {
 
             mServiceBound = false;
+            ServicePreferences.setServiceBound(MainActivity.this,mServiceBound);
         }
     };
 
@@ -54,4 +60,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mServiceBound){
+            unbindService(mServiceConnection);
+            mMediaPlayerService.stopSelf();
+        }
+    }
 }
