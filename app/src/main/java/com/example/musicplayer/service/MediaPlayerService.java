@@ -27,6 +27,7 @@ public class MediaPlayerService extends Service implements
 
 
     public static final String TAG = "MediaPlayerError";
+    public static final String EXTRA_MEDIA_FILE = "com.example.musicplayer.extraMedia";
     private final IBinder mIBinder = new LocalBinder();
     private MediaPlayer mMediaPlayer;
     private String mMediaFile;
@@ -34,6 +35,11 @@ public class MediaPlayerService extends Service implements
     private AudioManager mAudioManager;
     private AudioAttributes mPlaybackAttributes;
     private AudioFocusRequest mFocusRequest;
+    public static Intent newIntent(Context context,String  mediaFile){
+        Intent intent=new Intent(context,MediaPlayerService.class);
+        intent.putExtra(EXTRA_MEDIA_FILE,mediaFile);
+        return intent;
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
