@@ -1,6 +1,5 @@
 package com.example.musicplayer.service;
 
-import android.app.IntentService;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,20 +9,19 @@ import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.session.PlaybackState;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
-import androidx.core.app.JobIntentService;
 
+import com.example.musicplayer.controller.activity.MainActivity;
 import com.example.musicplayer.model.Audio;
 import com.example.musicplayer.model.PlaybackStatus;
+import com.example.musicplayer.utilities.StorageUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,9 +54,8 @@ public class MediaPlayerService extends Service implements
     private int mAudioIndex=-1;
     private Audio mActiveAudio;
 
-    public static Intent newIntent(Context context, String mediaFile) {
+    public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, MediaPlayerService.class);
-        intent.putExtra(EXTRA_MEDIA_FILE, mediaFile);
         return intent;
     }
 
@@ -297,6 +294,30 @@ public class MediaPlayerService extends Service implements
         mTelephonyManager.listen(
                 mPhoneStateListener
                 ,PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
+
+    private  BroadcastReceiver playNewAudioReceiver =new  BroadcastReceiver(){
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mAudioIndex= new StorageUtils(getApplicationContext()).loadAudioIndex();
+            if(mAudioIndex!=-1&&mAudioIndex<mAudioArrayList.size()){
+                mActiveAudio=mAudioArrayList.get(mAudioIndex);
+            }else {
+                stopSelf();
+            }
+            stopMedia();
+            mMediaPlayer.reset();
+            initMediaPLayer();
+            updateMetaDate();
+            buildNotification(PlaybackStatus.PLAYING);
+
+        }
+    };
+    private void registerPlayNewAudioReceiver(){
+        IntentFilter intentFilter=new IntentFilter(MainActivity.ACTION_PLAY_NEW_AUDIO);
+        registerReceiver(playNewAudioReceiver,intentFilter);
     }
 
 

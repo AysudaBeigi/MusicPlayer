@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private MediaPlayerService mMediaPlayerService;
     private boolean mServiceBound = false;
     private ArrayList<Audio> mAudioArrayList;
-    private static final String ACTION_PLAY_NEW_AUDIO =
+    public static final String ACTION_PLAY_NEW_AUDIO =
             "com.example.musicplayer.ACTION_PLAY_NEW_AUDIO";
 
     @Override
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         if (isPermissionGranted()) {
             loadAudio();
             Log.d(TAG, " first audio path :" + mAudioArrayList.get(0).getData());
-            playAudio(mAudioArrayList.get(0).getData());
+            playAudio();
 
         }
     }
