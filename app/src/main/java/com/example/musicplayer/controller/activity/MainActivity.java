@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.example.musicplayer.R;
 import com.example.musicplayer.model.Audio;
 import com.example.musicplayer.service.MediaPlayerService;
+import com.example.musicplayer.utilities.StorageUtils;
 
 import java.util.ArrayList;
 
@@ -37,8 +38,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 1;
     private MediaPlayerService mMediaPlayerService;
     private boolean mServiceBound = false;
-
     private ArrayList<Audio> mAudioArrayList;
+    private static final String ACTION_PLAY_NEW_AUDIO =
+            "com.example.musicplayer.ACTION_PLAY_NEW_AUDIO";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,17 +135,25 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void playAudio(String mediaFile) {
+    private void playAudio(int audioIndex) {
         Log.d(TAG, "playAudio + service bound:" + mServiceBound);
 
         if (!mServiceBound) {
             Log.d(TAG, "playAudio");
-            Intent playerIntent = MediaPlayerService.newIntent(this, mediaFile);
+            StorageUtils storageUtils=new StorageUtils(getApplicationContext());
+            storageUtils.storeAudioIndex(audioIndex);
+            storageUtils.storeAudios(mAudioArrayList);
+
+            Intent playerIntent = MediaPlayerService.newIntent(this);
             startService(playerIntent);
             bindService(playerIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
         } else {
+            StorageUtils storageUtils=new StorageUtils(getApplicationContext());
+            storageUtils.storeAudioIndex(audioIndex);
 
-            //todo:Send media with BroadcastReceiver
+            Intent broadcastIntent=new Intent(ACTION_PLAY_NEW_AUDIO);
+            sendBroadcast(broadcastIntent);
+
         }
     }
 

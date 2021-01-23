@@ -22,9 +22,11 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.JobIntentService;
 
+import com.example.musicplayer.model.Audio;
 import com.example.musicplayer.model.PlaybackStatus;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class MediaPlayerService extends Service implements
@@ -50,6 +52,9 @@ public class MediaPlayerService extends Service implements
     private boolean mOngoingCall = false;
     private PhoneStateListener mPhoneStateListener;
     private TelephonyManager mTelephonyManager;
+    private ArrayList<Audio> mAudioArrayList;
+    private int mAudioIndex=-1;
+    private Audio mActiveAudio;
 
     public static Intent newIntent(Context context, String mediaFile) {
         Intent intent = new Intent(context, MediaPlayerService.class);
