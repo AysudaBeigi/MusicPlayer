@@ -148,6 +148,14 @@ public class MediaPlayerService extends Service implements
         }
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        callStateListener();
+        registerBecomingNoisyReceiver();
+        registerPlayNewAudioReceiver();
+    }
 
     private AudioAttributes buildAudioAttributes() {
 
@@ -248,7 +256,7 @@ public class MediaPlayerService extends Service implements
     }
 
 
-    private BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mBecomingNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             pauseMedia();
@@ -260,7 +268,7 @@ public class MediaPlayerService extends Service implements
     private void registerBecomingNoisyReceiver() {
         IntentFilter intentFilter =
                 new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        registerReceiver(becomingNoisyReceiver, intentFilter);
+        registerReceiver(mBecomingNoisyReceiver, intentFilter);
 
     }
 
@@ -297,7 +305,7 @@ public class MediaPlayerService extends Service implements
     }
 
 
-    private  BroadcastReceiver playNewAudioReceiver =new  BroadcastReceiver(){
+    private  BroadcastReceiver mPlayNewAudioReceiver =new  BroadcastReceiver(){
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -317,7 +325,7 @@ public class MediaPlayerService extends Service implements
     };
     private void registerPlayNewAudioReceiver(){
         IntentFilter intentFilter=new IntentFilter(MainActivity.ACTION_PLAY_NEW_AUDIO);
-        registerReceiver(playNewAudioReceiver,intentFilter);
+        registerReceiver(mPlayNewAudioReceiver,intentFilter);
     }
 
 
@@ -329,6 +337,15 @@ public class MediaPlayerService extends Service implements
             mMediaPlayer.release();
         }
         removeAudioFocus();
+        if(mPhoneStateListener!=null){
+            mTelephonyManager.listen(mPhoneStateListener,
+                    PhoneStateListener.LISTEN_NONE);
+        }
+        removeNotification();
+        unregisterReceiver(mBecomingNoisyReceiver);
+        unregisterReceiver(mPlayNewAudioReceiver);
+        new StorageUtils(getApplicationContext()).clearCashedAudioPlayList();
+
     }
 
     private boolean removeAudioFocus() {
