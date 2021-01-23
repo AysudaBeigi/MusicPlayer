@@ -15,6 +15,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -42,12 +44,16 @@ public class MediaPlayerService extends Service implements
     private String mMediaFile;
     private int mResumePosition;
     private AudioManager mAudioManager;
-    private AudioAttributes mPlaybackAttributes=buildAudioAttributes();
-    private AudioFocusRequest mFocusRequest=buildAudioFocusRequest();
+    private AudioAttributes mPlaybackAttributes = buildAudioAttributes();
+    private AudioFocusRequest mFocusRequest = buildAudioFocusRequest();
     //private Handler mHandler=new Handler();
-    public static Intent newIntent(Context context,String  mediaFile){
-        Intent intent=new Intent(context,MediaPlayerService.class);
-        intent.putExtra(EXTRA_MEDIA_FILE,mediaFile);
+    private boolean mOngoingCall = false;
+    private PhoneStateListener mPhoneStateListener;
+    private TelephonyManager mTelephonyManager;
+
+    public static Intent newIntent(Context context, String mediaFile) {
+        Intent intent = new Intent(context, MediaPlayerService.class);
+        intent.putExtra(EXTRA_MEDIA_FILE, mediaFile);
         return intent;
     }
 
@@ -61,6 +67,7 @@ public class MediaPlayerService extends Service implements
             return MediaPlayerService.this;
         }
     }
+
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
 
@@ -140,7 +147,6 @@ public class MediaPlayerService extends Service implements
     }
 
 
-
     private AudioAttributes buildAudioAttributes() {
 
         mPlaybackAttributes = new AudioAttributes.Builder()
@@ -165,7 +171,7 @@ public class MediaPlayerService extends Service implements
     private boolean requestAudioFocus() {
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int result = mAudioManager.requestAudioFocus(mFocusRequest);
-        if(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             return true;
         }
         return false;
@@ -240,7 +246,7 @@ public class MediaPlayerService extends Service implements
     }
 
 
-    private BroadcastReceiver  becomingNoisyReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             pauseMedia();
@@ -248,13 +254,45 @@ public class MediaPlayerService extends Service implements
 
         }
     };
-    private void registerBecomingNoisyReceiver(){
-        IntentFilter intentFilter=
+
+    private void registerBecomingNoisyReceiver() {
+        IntentFilter intentFilter =
                 new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-        registerReceiver(becomingNoisyReceiver,intentFilter);
+        registerReceiver(becomingNoisyReceiver, intentFilter);
 
     }
 
+    private void callStateListener() {
+
+        mTelephonyManager =
+                (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        mPhoneStateListener = new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String phoneNumber) {
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                    case TelephonyManager.CALL_STATE_RINGING:
+                        if (mMediaPlayer != null) {
+                            pauseMedia();
+                            mOngoingCall = true;
+                        }
+                        break;
+                    case TelephonyManager.CALL_STATE_IDLE:
+                        if(mMediaPlayer!=null&&mOngoingCall){
+
+                            mOngoingCall=false;
+                            resumeMedia();
+                        }
+                        break;
+
+
+                }
+            }
+        };
+        mTelephonyManager.listen(
+                mPhoneStateListener
+                ,PhoneStateListener.LISTEN_CALL_STATE);
+    }
 
 
     @Override
@@ -266,6 +304,7 @@ public class MediaPlayerService extends Service implements
         }
         removeAudioFocus();
     }
+
     private boolean removeAudioFocus() {
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
                 mAudioManager.abandonAudioFocusRequest(mFocusRequest);
