@@ -2,12 +2,15 @@ package com.example.musicplayer.service;
 
 import android.app.IntentService;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.session.PlaybackState;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -16,6 +19,8 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.JobIntentService;
+
+import com.example.musicplayer.model.PlaybackStatus;
 
 import java.io.IOException;
 
@@ -51,6 +56,11 @@ public class MediaPlayerService extends Service implements
         return mIBinder;
     }
 
+    public class LocalBinder extends Binder {
+        public MediaPlayerService getService() {
+            return MediaPlayerService.this;
+        }
+    }
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
 
@@ -129,33 +139,7 @@ public class MediaPlayerService extends Service implements
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        try {
 
-            mMediaFile = intent.getExtras().getString(EXTRA_MEDIA_FILE);
-        } catch (NullPointerException e) {
-            stopSelf();
-        }
-        if (!requestAudioFocus())
-            stopSelf();
-        if (mMediaFile != null && !mMediaFile.equals(""))
-            initMediaPLayer();
-
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mMediaPlayer != null) {
-            stopMedia();
-            mMediaPlayer.release();
-        }
-        removeAudioFocus();
-    }
 
     private AudioAttributes buildAudioAttributes() {
 
@@ -178,33 +162,34 @@ public class MediaPlayerService extends Service implements
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private boolean requestAudioFocus() {
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int result = mAudioManager.requestAudioFocus(mFocusRequest);
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+        if(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             return true;
         }
         return false;
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private boolean removeAudioFocus() {
-        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
-                mAudioManager.abandonAudioFocusRequest(mFocusRequest);
-    }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        try {
 
-    public class LocalBinder extends Binder {
-        public MediaPlayerService getService() {
-            return MediaPlayerService.this;
+            mMediaFile = intent.getExtras().getString(EXTRA_MEDIA_FILE);
+        } catch (NullPointerException e) {
+            stopSelf();
         }
-    }
+        if (!requestAudioFocus())
+            stopSelf();
+        if (mMediaFile != null && !mMediaFile.equals(""))
+            initMediaPLayer();
 
+        return super.onStartCommand(intent, flags, startId);
+    }
 
     private void initMediaPLayer() {
-
 
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnCompletionListener(this);
@@ -255,4 +240,34 @@ public class MediaPlayerService extends Service implements
     }
 
 
+    private BroadcastReceiver  becomingNoisyReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            pauseMedia();
+            buildNotification(PlaybackStatus.PAUSED);
+
+        }
+    };
+    private void registerBecomingNoisyReceiver(){
+        IntentFilter intentFilter=
+                new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        registerReceiver(becomingNoisyReceiver,intentFilter);
+
+    }
+
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mMediaPlayer != null) {
+            stopMedia();
+            mMediaPlayer.release();
+        }
+        removeAudioFocus();
+    }
+    private boolean removeAudioFocus() {
+        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
+                mAudioManager.abandonAudioFocusRequest(mFocusRequest);
+    }
 }
