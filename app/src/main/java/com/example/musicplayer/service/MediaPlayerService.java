@@ -1,5 +1,6 @@
 package com.example.musicplayer.service;
 
+import android.app.IntentService;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -9,13 +10,16 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.app.JobIntentService;
 
 import java.io.IOException;
 
+@RequiresApi(api = Build.VERSION_CODES.O)
 public class MediaPlayerService extends Service implements
         MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener,
@@ -33,8 +37,9 @@ public class MediaPlayerService extends Service implements
     private String mMediaFile;
     private int mResumePosition;
     private AudioManager mAudioManager;
-    private AudioAttributes mPlaybackAttributes;
-    private AudioFocusRequest mFocusRequest;
+    private AudioAttributes mPlaybackAttributes=buildAudioAttributes();
+    private AudioFocusRequest mFocusRequest=buildAudioFocusRequest();
+    //private Handler mHandler=new Handler();
     public static Intent newIntent(Context context,String  mediaFile){
         Intent intent=new Intent(context,MediaPlayerService.class);
         intent.putExtra(EXTRA_MEDIA_FILE,mediaFile);
@@ -129,13 +134,13 @@ public class MediaPlayerService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         try {
 
-            mMediaFile = intent.getExtras().getString("media");
+            mMediaFile = intent.getExtras().getString(EXTRA_MEDIA_FILE);
         } catch (NullPointerException e) {
             stopSelf();
         }
         if (!requestAudioFocus())
             stopSelf();
-        if (mMediaFile != null && mMediaFile != "")
+        if (mMediaFile != null && !mMediaFile.equals(""))
             initMediaPLayer();
 
         return super.onStartCommand(intent, flags, startId);
@@ -152,7 +157,6 @@ public class MediaPlayerService extends Service implements
         removeAudioFocus();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private AudioAttributes buildAudioAttributes() {
 
         mPlaybackAttributes = new AudioAttributes.Builder()
@@ -162,23 +166,22 @@ public class MediaPlayerService extends Service implements
         return mPlaybackAttributes;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+
     private AudioFocusRequest buildAudioFocusRequest() {
         mFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                 .setAudioAttributes(mPlaybackAttributes)
                 .setAcceptsDelayedFocusGain(true)
-                .setWillPauseWhenDucked(true)
-                .setOnAudioFocusChangeListener(this, null) //todo: generate handler for notif thread
+                .setWillPauseWhenDucked(true) //setAcceptsDelayedFocusGain
+                .setOnAudioFocusChangeListener(this) //todo: generate handler for notif thread
                 .build();
-        return mFocusRequest;
+        return mFocusRequest; //willPauseWhenDucked(true
 
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private boolean requestAudioFocus() {
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        int result = mAudioManager.
-                requestAudioFocus(mFocusRequest);
+        int result = mAudioManager.requestAudioFocus(mFocusRequest);
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             return true;
         }
