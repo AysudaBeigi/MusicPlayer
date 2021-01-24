@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -33,6 +32,7 @@ import com.example.musicplayer.R;
 import com.example.musicplayer.controller.activity.MainActivity;
 import com.example.musicplayer.model.Audio;
 import com.example.musicplayer.model.PlaybackStatus;
+import com.example.musicplayer.utilities.AudioUtils;
 import com.example.musicplayer.utilities.StorageUtils;
 
 import java.io.IOException;
@@ -45,37 +45,36 @@ public class MediaPlayerService extends Service implements
         MediaPlayer.OnErrorListener,
         MediaPlayer.OnSeekCompleteListener,
         MediaPlayer.OnInfoListener,
-        MediaPlayer.OnBufferingUpdateListener,
         AudioManager.OnAudioFocusChangeListener {
 
 
-    public static final String TAG = "MediaPlayerError";
     public static final String EXTRA_MEDIA_FILE = "com.example.musicplayer.extraMedia";
+    public static final String ERROR_TAG = "MediaPlayerError";
     public static final String AUDIO_PLAYER = "AudioPlayer";
-    public static final int NOTIFICATION_ID = 0;
-    private final IBinder mIBinder = new LocalBinder();
-    private MediaPlayer mMediaPlayer;
-    private String mMediaFile;
-    private int mResumePosition;
-    private AudioManager mAudioManager;
-    private AudioAttributes mPlaybackAttributes = buildAudioAttributes();
-    private AudioFocusRequest mFocusRequest = buildAudioFocusRequest();
-    //private Handler mHandler=new Handler();
-    private boolean mOngoingCall = false;
-    private PhoneStateListener mPhoneStateListener;
-    private TelephonyManager mTelephonyManager;
-    private ArrayList<Audio> mAudioArrayList;
-    private int mAudioIndex = -1;
-    private Audio mActiveAudio;
     public static final String ACTION_PLAY = "com.example.musicplayer.ACTION_PLAY";
     public static final String ACTION_PAUSE = "com.example.musicplayer.ACTION_PAUSE";
     public static final String ACTION_PREVIOUS = "com.example.musicplayer.ACTION_PREVIOUS";
     public static final String ACTION_NEXT = "com.example.musicplayer.ACTION_NEXT";
     public static final String ACTION_STOP = "com.example.musicplayer.ACTION_STOP";
+    private static final int NOTIFICATION_ID = 100;
+    private String mMediaFile;
+    private final IBinder mIBinder = new LocalBinder();
+    private MediaPlayer mMediaPlayer;
+    private AudioManager mAudioManager;
+    private AudioFocusRequest mFocusRequest;
+    //private Handler mHandler=new Handler();
+    private PhoneStateListener mPhoneStateListener;
+    private TelephonyManager mTelephonyManager;
+    private ArrayList<Audio> mAudioArrayList;
+    private Audio mActiveAudio;
     private MediaSessionManager mMediaSessionManager;
     private MediaSessionCompat mMediaSession;
     private MediaControllerCompat.TransportControls mTransportControls;
-    private static final int NOTIFICATION_ID = 1;
+    private BecomingNoisyReceiver mBecomingNoisyReceiver;
+    private PlayNewAudioReceiver mPlayNewAudioReceiver;
+    private int mAudioIndex = -1;
+    private int mResumePosition;
+    private boolean mOngoingCall = false;
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, MediaPlayerService.class);
@@ -83,8 +82,12 @@ public class MediaPlayerService extends Service implements
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
-        return mIBinder;
+    public void onCreate() {
+        super.onCreate();
+        Log.d(ERROR_TAG, "onCreate MediaPlayerService");
+        callStateListener();
+        registerBecomingNoisyReceiver();
+        registerPlayNewAudioReceiver();
     }
 
     public class LocalBinder extends Binder {
@@ -94,10 +97,8 @@ public class MediaPlayerService extends Service implements
     }
 
     @Override
-    public void onBufferingUpdate(MediaPlayer mp, int percent) {
-
-        //Invoked indicating buffering status of
-        //a media resource being streamed over the network.
+    public IBinder onBind(Intent intent) {
+        return mIBinder;
     }
 
     @Override
@@ -110,13 +111,13 @@ public class MediaPlayerService extends Service implements
     public boolean onError(MediaPlayer mp, int what, int extra) {
         switch (what) {
             case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
-                Log.d(TAG, "MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK " + extra);
+                Log.d(ERROR_TAG, "MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK " + extra);
                 break;
             case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                Log.d(TAG, "MEDIA_ERROR_SERVER_DIED " + extra);
+                Log.d(ERROR_TAG, "MEDIA_ERROR_SERVER_DIED " + extra);
                 break;
             case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-                Log.d(TAG, "MEDIA_ERROR_UNKNOWN " + extra);
+                Log.d(ERROR_TAG, "MEDIA_ERROR_UNKNOWN " + extra);
                 break;
 
         }
@@ -143,7 +144,6 @@ public class MediaPlayerService extends Service implements
     public void onAudioFocusChange(int focusState) {
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                //resume play back
                 if (mMediaPlayer == null) {
                     initMediaPLayer();
                 } else if (!mMediaPlayer.isPlaying()) {
@@ -157,6 +157,7 @@ public class MediaPlayerService extends Service implements
                 }
                 mMediaPlayer.release();
                 mMediaPlayer = null;
+                //so next time  media player for play audio should initMedia first.
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 if (mMediaPlayer.isPlaying()) {
@@ -171,37 +172,19 @@ public class MediaPlayerService extends Service implements
         }
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        callStateListener();
-        registerBecomingNoisyReceiver();
-        registerPlayNewAudioReceiver();
-    }
-
-    private AudioAttributes buildAudioAttributes() {
-
-        mPlaybackAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build();
-        return mPlaybackAttributes;
-    }
-
 
     private AudioFocusRequest buildAudioFocusRequest() {
-        mFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(mPlaybackAttributes)
+        return new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(AudioUtils.buildAudioAttributes())
                 .setAcceptsDelayedFocusGain(true)
-                .setWillPauseWhenDucked(true) //setAcceptsDelayedFocusGain
-                .setOnAudioFocusChangeListener(this) //todo: generate handler for notif thread
+                .setWillPauseWhenDucked(true)
+                .setOnAudioFocusChangeListener(this)//setAcceptsDelayedFocusGain
                 .build();
-        return mFocusRequest; //willPauseWhenDucked(true
 
     }
 
     private boolean requestAudioFocus() {
+        mFocusRequest = buildAudioFocusRequest();
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int result = mAudioManager.requestAudioFocus(mFocusRequest);
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
@@ -214,19 +197,26 @@ public class MediaPlayerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(ERROR_TAG, "onStartCommand");
         try {
             StorageUtils storageUtils = new StorageUtils(getApplicationContext());
             mAudioArrayList = storageUtils.loadAudios();
             mAudioIndex = storageUtils.loadAudioIndex();
+
             if (mAudioIndex != -1 && mAudioIndex < mAudioArrayList.size()) {
-                //index is in a valid range
                 mActiveAudio = mAudioArrayList.get(mAudioIndex);
             } else {
                 stopSelf();
             }
         } catch (NullPointerException e) {
             stopSelf();
+
         }
+
+        if (!requestAudioFocus()) {
+            stopSelf();
+        }
+
         if (mMediaSessionManager == null) {
             try {
                 initMediaSession();
@@ -244,12 +234,11 @@ public class MediaPlayerService extends Service implements
     }
 
     private void initMediaPLayer() {
-
-        mMediaPlayer = new MediaPlayer();
+        if (mMediaPlayer == null)
+            mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnPreparedListener(this);
-        mMediaPlayer.setOnBufferingUpdateListener(this);
         mMediaPlayer.setOnSeekCompleteListener(this);
         mMediaPlayer.setOnInfoListener(this);
         mMediaPlayer.reset();
@@ -257,11 +246,11 @@ public class MediaPlayerService extends Service implements
         try {
             mMediaPlayer.setDataSource(mActiveAudio.getData());
         } catch (IOException e) {
+            Log.d(ERROR_TAG, "initMediaPLayer : catch (IOException e)");
             e.printStackTrace();
             stopSelf();
         }
         mMediaPlayer.prepareAsync();
-
 
     }
 
@@ -294,16 +283,20 @@ public class MediaPlayerService extends Service implements
     }
 
 
-    private BroadcastReceiver mBecomingNoisyReceiver = new BroadcastReceiver() {
+    private class BecomingNoisyReceiver extends BroadcastReceiver {
+
         @Override
         public void onReceive(Context context, Intent intent) {
             pauseMedia();
             buildNotification(PlaybackStatus.PAUSED);
 
         }
-    };
+    }
+
+    ;
 
     private void registerBecomingNoisyReceiver() {
+        mBecomingNoisyReceiver = new BecomingNoisyReceiver();
         IntentFilter intentFilter =
                 new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(mBecomingNoisyReceiver, intentFilter);
@@ -312,8 +305,7 @@ public class MediaPlayerService extends Service implements
 
     private void callStateListener() {
 
-        mTelephonyManager =
-                (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        mTelephonyManager = getSystemService(TelephonyManager.class);
         mPhoneStateListener = new PhoneStateListener() {
             @Override
             public void onCallStateChanged(int state, String phoneNumber) {
@@ -343,7 +335,7 @@ public class MediaPlayerService extends Service implements
     }
 
 
-    private BroadcastReceiver mPlayNewAudioReceiver = new BroadcastReceiver() {
+    private class PlayNewAudioReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -360,9 +352,12 @@ public class MediaPlayerService extends Service implements
             buildNotification(PlaybackStatus.PLAYING);
 
         }
-    };
+    }
+
+    ;
 
     private void registerPlayNewAudioReceiver() {
+        mPlayNewAudioReceiver = new PlayNewAudioReceiver();
         IntentFilter intentFilter =
                 new IntentFilter(MainActivity.ACTION_PLAY_NEW_AUDIO);
         registerReceiver(mPlayNewAudioReceiver, intentFilter);
@@ -376,8 +371,8 @@ public class MediaPlayerService extends Service implements
         mMediaSession =
                 new MediaSessionCompat(getApplicationContext(),
                         AUDIO_PLAYER);
-        mTransportControls = mMediaSession.
-                getController().getTransportControls();
+        mTransportControls =
+                mMediaSession.getController().getTransportControls();
 
         mMediaSession.setActive(true);
         mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -446,7 +441,7 @@ public class MediaPlayerService extends Service implements
 
     private void skipToNext() {
         if (mAudioIndex == mAudioArrayList.size() - 1) {
-            mAudioIndex = NOTIFICATION_ID;
+            mAudioIndex = 0;
             mActiveAudio = mAudioArrayList.get(mAudioIndex);
         } else {
             mActiveAudio = mAudioArrayList.get(++mAudioIndex);
@@ -458,7 +453,7 @@ public class MediaPlayerService extends Service implements
     }
 
     private void skipToPrevious() {
-        if (mAudioIndex == NOTIFICATION_ID) {
+        if (mAudioIndex == 0) {
             mAudioIndex = mAudioArrayList.size() - 1;
             mActiveAudio = mAudioArrayList.get(mAudioIndex);
         } else {
@@ -479,7 +474,7 @@ public class MediaPlayerService extends Service implements
             playPauseAction = playbackAction(1);
         } else if (playbackStatus == PlaybackStatus.PAUSED) {
             notificationAction = android.R.drawable.ic_media_play;
-            playPauseAction = playbackAction(NOTIFICATION_ID);
+            playPauseAction = playbackAction(0);
         }
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),
                 R.mipmap.music_player_image);
@@ -495,7 +490,7 @@ public class MediaPlayerService extends Service implements
                                 new androidx.media.app.NotificationCompat.
                                         MediaStyle().
                                         setMediaSession(mMediaSession.getSessionToken())
-                                        .setShowActionsInCompactView(NOTIFICATION_ID, 1, 2))
+                                        .setShowActionsInCompactView(0, 1, 2))
                         .setColor(getResources().getColor(R.color.colorPrimary))
                         .setLargeIcon(largeIcon)
                         .setSmallIcon(android.R.drawable.stat_sys_headset)

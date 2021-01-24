@@ -35,21 +35,22 @@ import android.provider.MediaStore.Audio.Media;
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MusicPlayerMainActivity";
     public static final String BUNDLE_SERVICE_STATE = "ServiceState";
+    public static final String ACTION_PLAY_NEW_AUDIO =
+            "com.example.musicplayer.ACTION_PLAY_NEW_AUDIO";
     private static final int REQUEST_CODE = 1;
     private MediaPlayerService mMediaPlayerService;
     private boolean mServiceBound = false;
     private ArrayList<Audio> mAudioArrayList;
-    public static final String ACTION_PLAY_NEW_AUDIO =
-            "com.example.musicplayer.ACTION_PLAY_NEW_AUDIO";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG,"MainActivity : onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (isPermissionGranted()) {
             loadAudio();
             Log.d(TAG, " first audio path :" + mAudioArrayList.get(0).getData());
-            playAudio();
+            playAudio(4);
 
         }
     }
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 loadAudio();
                 Log.d(TAG, " first audio path :" + mAudioArrayList.get(0).getData());
-                playAudio(mAudioArrayList.get(0).getData());
+                playAudio(4);
 
             } else {
                 requestPermission();

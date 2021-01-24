@@ -21,7 +21,7 @@ public class StorageUtils {
     public static final String PREF_AUDIO_ARRAY_LIST = "prefAudioArrayList";
     public static final String PREF_AUDIO_INDEX = "prefAudioIndex";
     private SharedPreferences mSharedPreferences;
-    private Context mContext;
+    private  Context mContext;
 
     public StorageUtils(Context context) {
         mContext = context;
