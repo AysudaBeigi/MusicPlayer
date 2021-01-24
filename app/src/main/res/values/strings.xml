@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MusicPlayer</string>
+    <string name="channel_id">music_player_channel_id</string>
+    <string name="channel_name">musicPlayerChannel</string>
+    <string name="description">this is music player channel </string>
+
 </resources>
