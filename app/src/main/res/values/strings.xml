@@ -3,5 +3,10 @@
     <string name="channel_id">music_player_channel_id</string>
     <string name="channel_name">musicPlayerChannel</string>
     <string name="description">this is music player channel </string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="tab_musics">MUSICS</string>
+    <string name="tab_albums">ALBUMS</string>
+    <string name="tab_artists">ARTISTS</string>
 
 </resources>

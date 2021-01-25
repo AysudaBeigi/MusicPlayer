@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+
+    android:layout_height="match_parent"
+    android:layout_margin="2dp"
+    android:padding="1dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/image_view_item_music"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        app:srcCompat="@drawable/music" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/text_view_item_music_title"
+        android:layout_width="fill_parent"
+        android:layout_height="72dp"
+        android:textColor="@color/white_ee"
+        android:textSize="24sp"
+        android:gravity="center"
+        android:layout_toEndOf="@+id/image_view_item_music"
+        android:layout_toRightOf="@+id/image_view_item_music"
+        tools:text="hello babay !!!!!!" />
+
+
+</RelativeLayout>

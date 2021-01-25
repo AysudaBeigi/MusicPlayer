@@ -1,6 +1,6 @@
 package com.example.musicplayer.model;
 
-public enum PlaybackStatus {
+public enum PlaybackState {
     PAUSED,
     PLAYING
 }

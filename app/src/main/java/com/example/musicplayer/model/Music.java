@@ -2,17 +2,19 @@ package com.example.musicplayer.model;
 
 import java.io.Serializable;
 
-public class Audio implements Serializable {
+public class Music implements Serializable {
     private String mData;
     private String mTitle;
     private String mAlbum;
     private String mArtist;
+    private String mDuration;
 
-    public Audio(String data, String title, String album, String artist) {
+    public Music(String data, String title, String album, String artist, String duration) {
         mData = data;
         mTitle = title;
         mAlbum = album;
         mArtist = artist;
+        mDuration=duration;
     }
 
     public String getData() {
@@ -31,6 +33,10 @@ public class Audio implements Serializable {
         return mArtist;
     }
 
+    public String getDuration() {
+        return mDuration;
+    }
+
     public void setData(String data) {
         mData = data;
     }
@@ -45,5 +51,9 @@ public class Audio implements Serializable {
 
     public void setArtist(String artist) {
         mArtist = artist;
+    }
+
+    public void setDuration(String duration) {
+        mDuration = duration;
     }
 }

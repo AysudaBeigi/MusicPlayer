@@ -6,7 +6,7 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-import com.example.musicplayer.model.Audio;
+import com.example.musicplayer.model.Music;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -18,8 +18,8 @@ import android.content.SharedPreferences.Editor;
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class StorageUtils {
     public static final String PREF_STORAGE = "om.example.musicplayer.sharedPreferencesStorage";
-    public static final String PREF_AUDIO_ARRAY_LIST = "prefAudioArrayList";
-    public static final String PREF_AUDIO_INDEX = "prefAudioIndex";
+    public static final String PREF_ALL_MUSICS_LIST = "prefAllMusicsList";
+    public static final String PREF_MUSIC_INDEX = "prefMusicIndex";
     private SharedPreferences mSharedPreferences;
     private  Context mContext;
 
@@ -27,43 +27,43 @@ public class StorageUtils {
         mContext = context;
     }
 
-    public void storeAudios(ArrayList<Audio> audioArrayList) {
+    public void storeAllMusicsList(ArrayList<Music> musicArrayList) {
         mSharedPreferences = getSharedPreferences();
         Editor editor = mSharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(audioArrayList);
-        editor.putString(PREF_AUDIO_ARRAY_LIST, json);
+        String json = gson.toJson(musicArrayList);
+        editor.putString(PREF_ALL_MUSICS_LIST, json);
         editor.apply();
     }
 
-    public ArrayList<Audio> loadAudios() {
+    public ArrayList<Music> loadAllMusicsList() {
         mSharedPreferences = getSharedPreferences();
         Gson gson = new Gson();
-        String json = mSharedPreferences.getString(PREF_AUDIO_ARRAY_LIST, null);
-        Type type = new TypeToken<ArrayList<Audio>>() {
+        String json = mSharedPreferences.getString(PREF_ALL_MUSICS_LIST, null);
+        Type type = new TypeToken<ArrayList<Music>>() {
 
         }.getType();
         return gson.fromJson(json, type);
     }
 
-    public void storeAudioIndex(int audioIndex) {
+    public void storeMusicIndex(int audioIndex) {
         getSharedPreferences().edit().
-                putInt(PREF_AUDIO_INDEX, audioIndex)
+                putInt(PREF_MUSIC_INDEX, audioIndex)
                 .apply();
 
     }
 
 
-    public int loadAudioIndex() {
+    public int loadMusicIndex() {
         mSharedPreferences = getSharedPreferences();
-        return mSharedPreferences.getInt(PREF_AUDIO_INDEX, -1);
+        return mSharedPreferences.getInt(PREF_MUSIC_INDEX, -1);
     }
 
     private SharedPreferences getSharedPreferences() {
         return mContext.getSharedPreferences(PREF_STORAGE, Context.MODE_PRIVATE);
     }
 
-    public void clearCashedAudioPlayList() {
+    public void clearCashedAllMusicsList() {
         mSharedPreferences = getSharedPreferences();
         Editor editor = mSharedPreferences.edit();
         editor.clear();

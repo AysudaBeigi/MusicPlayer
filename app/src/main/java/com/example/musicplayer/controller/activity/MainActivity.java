@@ -5,6 +5,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.Manifest;
 import android.content.ComponentName;
@@ -22,9 +26,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.musicplayer.R;
-import com.example.musicplayer.model.Audio;
+import com.example.musicplayer.controller.fragment.AlbumsFragment;
+import com.example.musicplayer.controller.fragment.AllMusicsFragment;
+import com.example.musicplayer.controller.fragment.ArtistsFragment;
+import com.example.musicplayer.model.Music;
 import com.example.musicplayer.service.MediaPlayerService;
 import com.example.musicplayer.utilities.StorageUtils;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.ArrayList;
 
@@ -40,19 +49,87 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 1;
     private MediaPlayerService mMediaPlayerService;
     private boolean mServiceBound = false;
-    private ArrayList<Audio> mAudioArrayList;
+    private ArrayList<Music> mMusicArrayList;
+    private TabLayout mTabLayout;
+    private ViewPager2 mViewPager;
+    private PageAdapter mPageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG,"MainActivity : onCreate");
+        Log.d(TAG, "MainActivity : onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (isPermissionGranted()) {
-            loadAudio();
-            Log.d(TAG, " first audio path :" + mAudioArrayList.get(0).getData());
-            playAudio(4);
+            loadMusic();
+            Log.d(TAG, " first audio path :" + mMusicArrayList.get(0).getData());
+            playMusic(4);
 
         }
+        findViews();
+        initView();
+    }
+
+    private void findViews() {
+        mTabLayout = findViewById(R.id.tab_layout_music_player);
+        mViewPager = findViewById(R.id.view_pager2_music_player);
+    }
+
+    private void initView() {
+        mPageAdapter = new PageAdapter(MainActivity.this);
+        mViewPager.setAdapter(mPageAdapter);
+
+        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator
+                (mTabLayout, mViewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+                    @Override
+                    public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                        switch (position) {
+                            case 0: {
+                                tab.setText(R.string.tab_musics);
+                                break;
+                            }
+                            case 1: {
+                                tab.setText(R.string.tab_albums);
+                                break;
+                            }
+                            case 2: {
+                                tab.setText(R.string.tab_artists);
+                                break;
+                            }
+                        }
+                    }
+                });
+
+        tabLayoutMediator.attach();
+
+    }
+
+    private class PageAdapter extends FragmentStateAdapter {
+
+        public PageAdapter(@NonNull FragmentActivity fragmentActivity)
+        {
+            super(fragmentActivity);
+        }
+
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            switch (position) {
+                case 0:
+                    return AllMusicsFragment.newInstance();
+                case 1:
+                    return AlbumsFragment.newInstance();
+                case 2:
+                    return ArtistsFragment.newInstance();
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return 3;
+        }
+
     }
 
     @Override
@@ -86,9 +163,9 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                loadAudio();
-                Log.d(TAG, " first audio path :" + mAudioArrayList.get(0).getData());
-                playAudio(4);
+                loadMusic();
+                Log.d(TAG, " first audio path :" + mMusicArrayList.get(0).getData());
+                playMusic(4);
 
             } else {
                 requestPermission();
@@ -105,8 +182,8 @@ public class MainActivity extends AppCompatActivity {
                 REQUEST_CODE);
     }
 
-    private void loadAudio() {
-        Log.d(TAG, "loadAudio :");
+    private void loadMusic() {
+        Log.d(TAG, "loadMusic :");
 
         ContentResolver contentResolver = getContentResolver();
         Uri uri = Media.EXTERNAL_CONTENT_URI;
@@ -120,14 +197,15 @@ public class MainActivity extends AppCompatActivity {
                         sortOrder);
         try {
             if (cursor != null && cursor.getCount() > 0) {
-                mAudioArrayList = new ArrayList<>();
+                mMusicArrayList = new ArrayList<>();
                 while (cursor.moveToNext()) {
                     String data = cursor.getString(cursor.getColumnIndex(Media.DATA));
                     String title = cursor.getString(cursor.getColumnIndex(Media.TITLE));
                     String album = cursor.getString(cursor.getColumnIndex(Media.ALBUM));
                     String artist = cursor.getString(cursor.getColumnIndex(Media.ARTIST));
+                    String duration = cursor.getString(cursor.getColumnIndex(Media.DURATION));
 
-                    mAudioArrayList.add(new Audio(data, title, album, artist));
+                    mMusicArrayList.add(new Music(data, title, album, artist, duration));
                 }
             }
         } finally {
@@ -136,23 +214,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void playAudio(int audioIndex) {
-        Log.d(TAG, "playAudio + service bound:" + mServiceBound);
+    private void playMusic(int musicIndex) {
+        Log.d(TAG, "playMusic");
 
+        StorageUtils storageUtils = new StorageUtils(getApplicationContext());
         if (!mServiceBound) {
-            Log.d(TAG, "playAudio");
-            StorageUtils storageUtils=new StorageUtils(getApplicationContext());
-            storageUtils.storeAudioIndex(audioIndex);
-            storageUtils.storeAudios(mAudioArrayList);
+            Log.d(TAG, "playAudio + !service bound:" );
+            storageUtils.storeMusicIndex(musicIndex);
+            storageUtils.storeAllMusicsList(mMusicArrayList);
 
             Intent playerIntent = MediaPlayerService.newIntent(this);
             startService(playerIntent);
             bindService(playerIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
         } else {
-            StorageUtils storageUtils=new StorageUtils(getApplicationContext());
-            storageUtils.storeAudioIndex(audioIndex);
+            Log.d(TAG, "playAudio + service bound:" );
 
-            Intent broadcastIntent=new Intent(ACTION_PLAY_NEW_AUDIO);
+            storageUtils.storeMusicIndex(musicIndex);
+            Intent broadcastIntent = new Intent(ACTION_PLAY_NEW_AUDIO);
             sendBroadcast(broadcastIntent);
 
         }
