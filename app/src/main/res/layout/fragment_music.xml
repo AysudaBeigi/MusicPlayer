@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    tools:context=".controller.fragment.MusicFragment">
+
+    <RelativeLayout
+        android:id="@+id/layout_introduction"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/orange_00">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/image_view_short_music_fragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/note" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_view_music"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/image_view_short_music_fragment"
+            android:layout_toRightOf="@+id/image_view_short_music_fragment"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:theme="@style/TextStyle"
+            tools:text="this is music name " />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_view_artist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text_view_music"
+            android:layout_toEndOf="@+id/image_view_short_music_fragment"
+            android:layout_toRightOf="@+id/image_view_short_music_fragment"
+            android:gravity="center"
+
+
+            android:theme="@style/TextStyle"
+            tools:text="this is artist name " />
+
+
+    </RelativeLayout>
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/image_view_cover"
+        android:layout_width="match_parent"
+        android:layout_height="550dp"
+        android:layout_below="@+id/layout_introduction"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/violon" />
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:id="@+id/seekbar_playing"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/image_view_cover"
+         >
+
+    </androidx.appcompat.widget.AppCompatSeekBar>
+
+    <RelativeLayout
+        android:id="@+id/layout_action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:layout_below="@+id/seekbar_playing">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/image_view_shuffle"
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            app:srcCompat="@drawable/shuffle" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/image_view_previouse"
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/previous"
+            android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@id/image_view_play_pause"
+            android:layout_toStartOf="@id/image_view_play_pause" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/image_view_play_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+
+            app:srcCompat="@drawable/play" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/image_view_next"
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@+id/image_view_play_pause"
+            app:srcCompat="@drawable/next" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/image_view_repeat"
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            app:srcCompat="@drawable/repeat2"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
+
+
+</RelativeLayout>

@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/fragment_container"
-    tools:context=".controller.activity.MainActivity">
+    android:orientation="vertical"
+    tools:context=".controller.activity.PagerActivity">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout_music_player"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        ><!--
+        android:layout_height="wrap_content"><!--
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tab_item_all_musics"
             android:layout_width="wrap_content"
@@ -37,9 +36,6 @@
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager2_music_player"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/tab_layout_music_player"
-        />
+        android:layout_height="match_parent" />
 
-
-</FrameLayout>
+</LinearLayout>

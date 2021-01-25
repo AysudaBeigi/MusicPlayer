@@ -29,7 +29,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.musicplayer.R;
-import com.example.musicplayer.controller.activity.MainActivity;
+import com.example.musicplayer.controller.activity.PagerActivity;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.model.PlaybackState;
 import com.example.musicplayer.utilities.AudioUtils;
@@ -39,7 +39,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
-public class MediaPlayerService extends Service implements
+public class MusicPlayerService extends Service implements
         MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener,
         MediaPlayer.OnErrorListener,
@@ -77,7 +77,7 @@ public class MediaPlayerService extends Service implements
     private boolean mOngoingCall = false;
 
     public static Intent newIntent(Context context) {
-        Intent intent = new Intent(context, MediaPlayerService.class);
+        Intent intent = new Intent(context, MusicPlayerService.class);
         return intent;
     }
 
@@ -91,8 +91,8 @@ public class MediaPlayerService extends Service implements
     }
 
     public class LocalBinder extends Binder {
-        public MediaPlayerService getService() {
-            return MediaPlayerService.this;
+        public MusicPlayerService getService() {
+            return MusicPlayerService.this;
         }
     }
 
@@ -197,10 +197,10 @@ public class MediaPlayerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(ERROR_TAG, "onStartCommand");
+        Log.d(PagerActivity.TAG, "onStartCommand");
         try {
             StorageUtils storageUtils = new StorageUtils(getApplicationContext());
-            mMusicArrayList = storageUtils.loadAllMusicsList();
+            mMusicArrayList = storageUtils.loadMusicsList();
             mAudioIndex = storageUtils.loadMusicIndex();
 
             if (mAudioIndex != -1 && mAudioIndex < mMusicArrayList.size()) {
@@ -234,6 +234,7 @@ public class MediaPlayerService extends Service implements
     }
 
     private void initMediaPLayer() {
+        Log.d(PagerActivity.TAG,"initMediaPLayer");
         if (mMediaPlayer == null)
             mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnCompletionListener(this);
@@ -255,6 +256,7 @@ public class MediaPlayerService extends Service implements
     }
 
     private void playMedia() {
+        Log.d(PagerActivity.TAG,"playMedia");
         if (!mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
         }
@@ -269,6 +271,8 @@ public class MediaPlayerService extends Service implements
     }
 
     private void pauseMedia() {
+        Log.d(PagerActivity.TAG,"pauseMedia");
+
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
             mResumePosition = mMediaPlayer.getCurrentPosition();
@@ -276,6 +280,8 @@ public class MediaPlayerService extends Service implements
     }
 
     private void resumeMedia() {
+        Log.d(PagerActivity.TAG,"resumeMedia");
+
         if (!mMediaPlayer.isPlaying()) {
             mMediaPlayer.seekTo(mResumePosition);
             mMediaPlayer.start();
@@ -304,6 +310,8 @@ public class MediaPlayerService extends Service implements
     }
 
     private void callStateListener() {
+
+        Log.d(PagerActivity.TAG,"callStateListener");
 
         mTelephonyManager = getSystemService(TelephonyManager.class);
         mPhoneStateListener = new PhoneStateListener() {
@@ -339,6 +347,7 @@ public class MediaPlayerService extends Service implements
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(PagerActivity.TAG," PlayNewAudioReceiver+ onReceive");
             mAudioIndex = new StorageUtils(getApplicationContext()).loadMusicIndex();
             if (mAudioIndex != -1 && mAudioIndex < mMusicArrayList.size()) {
                 mActiveMusic = mMusicArrayList.get(mAudioIndex);
@@ -359,11 +368,12 @@ public class MediaPlayerService extends Service implements
     private void registerPlayNewAudioReceiver() {
         mPlayNewAudioReceiver = new PlayNewAudioReceiver();
         IntentFilter intentFilter =
-                new IntentFilter(MainActivity.ACTION_PLAY_NEW_AUDIO);
+                new IntentFilter(PagerActivity.ACTION_PLAY_NEW_AUDIO);
         registerReceiver(mPlayNewAudioReceiver, intentFilter);
     }
 
     private void initMediaSession() throws RemoteException {
+        Log.d(PagerActivity.TAG,"initMediaSession");
         if (mMediaSessionManager != null)
             return;
         mMediaSessionManager = getSystemService(MediaSessionManager.class);
@@ -467,6 +477,7 @@ public class MediaPlayerService extends Service implements
 
 
     private void buildNotification(PlaybackState playbackState) {
+        Log.d(PagerActivity.TAG,"buildNotification");
         int notificationAction = android.R.drawable.ic_media_pause;
         PendingIntent playPauseAction = null;
         if (playbackState == PlaybackState.PLAYING) {
@@ -517,8 +528,9 @@ public class MediaPlayerService extends Service implements
     }
 
     private PendingIntent playbackAction(int requestCode) {
+        Log.d(PagerActivity.TAG,"playbackAction");
         Intent playbackAction =
-                new Intent(this, MediaPlayerService.class);
+                new Intent(this, MusicPlayerService.class);
         switch (requestCode) {
             case 0:
                 // Play
@@ -553,6 +565,7 @@ public class MediaPlayerService extends Service implements
     }
 
     private void handleIncomingActions(Intent playbackAction) {
+        Log.d(PagerActivity.TAG,"handleIncomingActions");
         if (playbackAction == null || playbackAction.getAction() == null)
             return;
 

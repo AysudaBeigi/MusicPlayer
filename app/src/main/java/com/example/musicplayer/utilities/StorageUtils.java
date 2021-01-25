@@ -27,7 +27,7 @@ public class StorageUtils {
         mContext = context;
     }
 
-    public void storeAllMusicsList(ArrayList<Music> musicArrayList) {
+    public void storeMusicsList(ArrayList<Music> musicArrayList) {
         mSharedPreferences = getSharedPreferences();
         Editor editor = mSharedPreferences.edit();
         Gson gson = new Gson();
@@ -36,7 +36,7 @@ public class StorageUtils {
         editor.apply();
     }
 
-    public ArrayList<Music> loadAllMusicsList() {
+    public ArrayList<Music> loadMusicsList() {
         mSharedPreferences = getSharedPreferences();
         Gson gson = new Gson();
         String json = mSharedPreferences.getString(PREF_ALL_MUSICS_LIST, null);

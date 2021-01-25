@@ -30,8 +30,7 @@ import com.example.musicplayer.controller.fragment.AlbumsFragment;
 import com.example.musicplayer.controller.fragment.AllMusicsFragment;
 import com.example.musicplayer.controller.fragment.ArtistsFragment;
 import com.example.musicplayer.model.Music;
-import com.example.musicplayer.service.MediaPlayerService;
-import com.example.musicplayer.utilities.StorageUtils;
+import com.example.musicplayer.service.MusicPlayerService;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -41,13 +40,13 @@ import android.provider.MediaStore.Audio.Media;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 
-public class MainActivity extends AppCompatActivity {
+public class PagerActivity extends AppCompatActivity {
     public static final String TAG = "MusicPlayerMainActivity";
     public static final String BUNDLE_SERVICE_STATE = "ServiceState";
     public static final String ACTION_PLAY_NEW_AUDIO =
             "com.example.musicplayer.ACTION_PLAY_NEW_AUDIO";
     private static final int REQUEST_CODE = 1;
-    private MediaPlayerService mMediaPlayerService;
+    private MusicPlayerService mMusicPlayerService;
     private boolean mServiceBound = false;
     private ArrayList<Music> mMusicArrayList;
     private TabLayout mTabLayout;
@@ -58,11 +57,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity : onCreate");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_pager);
         if (isPermissionGranted()) {
             loadMusic();
             Log.d(TAG, " first audio path :" + mMusicArrayList.get(0).getData());
-            playMusic(4);
+            playMusic(1);
 
         }
         findViews();
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        mPageAdapter = new PageAdapter(MainActivity.this);
+        mPageAdapter = new PageAdapter(PagerActivity.this);
         mViewPager.setAdapter(mPageAdapter);
 
         TabLayoutMediator tabLayoutMediator = new TabLayoutMediator
@@ -175,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(
-                MainActivity.this,
+                PagerActivity.this,
                 new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.READ_PHONE_STATE,
                         Manifest.permission.MEDIA_CONTENT_CONTROL},
@@ -217,19 +216,19 @@ public class MainActivity extends AppCompatActivity {
     private void playMusic(int musicIndex) {
         Log.d(TAG, "playMusic");
 
-        StorageUtils storageUtils = new StorageUtils(getApplicationContext());
+        //StorageUtils storageUtils = new StorageUtils(getApplicationContext());
         if (!mServiceBound) {
             Log.d(TAG, "playAudio + !service bound:" );
-            storageUtils.storeMusicIndex(musicIndex);
-            storageUtils.storeAllMusicsList(mMusicArrayList);
-
-            Intent playerIntent = MediaPlayerService.newIntent(this);
+            /*storageUtils.storeMusicIndex(musicIndex);
+            storageUtils.storeMusicsList(mMusicArrayList);
+*/
+            Intent playerIntent = MusicPlayerService.newIntent(this);
             startService(playerIntent);
             bindService(playerIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
         } else {
             Log.d(TAG, "playAudio + service bound:" );
 
-            storageUtils.storeMusicIndex(musicIndex);
+           // storageUtils.storeMusicIndex(musicIndex);
             Intent broadcastIntent = new Intent(ACTION_PLAY_NEW_AUDIO);
             sendBroadcast(broadcastIntent);
 
@@ -242,12 +241,12 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, " onServiceConnected");
 
-            MediaPlayerService.LocalBinder binder =
-                    (MediaPlayerService.LocalBinder) service;
-            mMediaPlayerService = binder.getService();
+            MusicPlayerService.LocalBinder binder =
+                    (MusicPlayerService.LocalBinder) service;
+            mMusicPlayerService = binder.getService();
             mServiceBound = true;
 
-            Toast.makeText(MainActivity.this,
+            Toast.makeText(PagerActivity.this,
                     "Service bound", Toast.LENGTH_LONG).show();
 
         }
@@ -262,10 +261,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Log.d(PagerActivity.TAG,"onDestroy");
+
         super.onDestroy();
         if (mServiceBound) {
+            Log.d(PagerActivity.TAG,"unbindService");
+
             unbindService(mServiceConnection);
-            mMediaPlayerService.stopSelf();
+            mMusicPlayerService.stopSelf();
         }
     }
 }
