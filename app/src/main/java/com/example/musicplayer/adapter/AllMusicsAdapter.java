@@ -36,7 +36,7 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
 
         mContext = context;
         mMusicRepository=MusicRepository.getInstance(mContext);
-        mAllMusicsList = mMusicRepository.loadAllMusicsList();
+        mAllMusicsList = mMusicRepository.getAllMusicsList();
 
     }
 
@@ -76,8 +76,8 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mMusicRepository.storeMusicIndex(mPosition);
-                    mMusicRepository.storeAllMusicsList(mAllMusicsList);
+                    mMusicRepository.setCurrentMusicIndex(mPosition);
+                    mMusicRepository.setAllMusicsList(mAllMusicsList);
 
                     startMusicActivity();
                 }

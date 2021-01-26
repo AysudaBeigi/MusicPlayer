@@ -43,6 +43,8 @@ public class MusicFragment extends Fragment {
     private MaterialTextView mTextViewDuration;
     private MaterialTextView mTextViewTimeComeThrough;
 
+    MusicRepository mMusicRepository ;
+
 
     public MusicFragment() {
         // Required empty public constructor
@@ -60,9 +62,9 @@ public class MusicFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MusicRepository musicRepository = new MusicRepository(getActivity());
-        mMusicArrayList = musicRepository.loadAllMusicsList();
-        mMusicIndex = musicRepository.loadMusicIndex();
+        mMusicRepository=MusicRepository.getInstance(getActivity());
+        mMusicArrayList = mMusicRepository.getAllMusicsList();
+        mMusicIndex = mMusicRepository.getCurrentMusicIndex();
         mActiveMusic=mMusicArrayList.get(mMusicIndex);
     }
 

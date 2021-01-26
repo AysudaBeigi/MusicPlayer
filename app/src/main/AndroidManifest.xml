@@ -15,7 +15,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicPlayer">
-        <activity android:name=".controller.activity.MusicActivity"></activity>
+        <activity android:name=".controller.activity.SingleFragmentActivity"></activity>
+        <activity android:name=".controller.activity.ArtistDetailActivity" />
+        <activity android:name=".controller.activity.AlbumDetailActivity" />
+        <activity android:name=".controller.activity.MusicActivity" />
 
         <service
             android:name=".service.MusicPlayerService"

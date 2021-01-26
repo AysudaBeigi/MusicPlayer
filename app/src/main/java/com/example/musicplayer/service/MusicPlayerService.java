@@ -199,9 +199,9 @@ public class MusicPlayerService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(PagerActivity.TAG, "onStartCommand");
         try {
-            MusicRepository musicRepository = new MusicRepository(getApplicationContext());
-            mMusicArrayList = musicRepository.loadAllMusicsList();
-            mAudioIndex = musicRepository.loadMusicIndex();
+            MusicRepository musicRepository =  MusicRepository.getInstance(getApplicationContext());
+            mMusicArrayList = musicRepository.getAllMusicsList();
+            mAudioIndex = musicRepository.getCurrentMusicIndex();
 
             if (mAudioIndex != -1 && mAudioIndex < mMusicArrayList.size()) {
                 mActiveMusic = mMusicArrayList.get(mAudioIndex);
@@ -348,7 +348,7 @@ public class MusicPlayerService extends Service implements
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(PagerActivity.TAG," PlayNewAudioReceiver+ onReceive");
-            mAudioIndex = new MusicRepository(getApplicationContext()).loadMusicIndex();
+            mAudioIndex =MusicRepository.getInstance(getApplicationContext()).getCurrentMusicIndex();
             if (mAudioIndex != -1 && mAudioIndex < mMusicArrayList.size()) {
                 mActiveMusic = mMusicArrayList.get(mAudioIndex);
             } else {
@@ -456,7 +456,8 @@ public class MusicPlayerService extends Service implements
         } else {
             mActiveMusic = mMusicArrayList.get(++mAudioIndex);
         }
-        new MusicRepository(getApplicationContext()).storeMusicIndex(mAudioIndex);
+         MusicRepository.getInstance(getApplicationContext()).
+                setCurrentMusicIndex(mAudioIndex);
         stopMedia();
         mMediaPlayer.reset();
         initMediaPLayer();
@@ -469,7 +470,7 @@ public class MusicPlayerService extends Service implements
         } else {
             mActiveMusic = mMusicArrayList.get(--mAudioIndex);
         }
-        new MusicRepository(getApplicationContext()).storeMusicIndex(mAudioIndex);
+         MusicRepository.getInstance(getApplicationContext()).setCurrentMusicIndex(mAudioIndex);
         stopMedia();
         mMediaPlayer.reset();
         initMediaPLayer();
@@ -600,7 +601,7 @@ public class MusicPlayerService extends Service implements
         removeNotification();
         unregisterReceiver(mBecomingNoisyReceiver);
         unregisterReceiver(mPlayNewAudioReceiver);
-        new MusicRepository(getApplicationContext()).clearCashedAllMusicsList();
+         MusicRepository.getInstance(getApplicationContext()).clearCashedAllMusicsList();
 
     }
 

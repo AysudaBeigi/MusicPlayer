@@ -3,10 +3,12 @@ package com.example.musicplayer.controller.activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -67,7 +69,11 @@ public class PagerActivity extends AppCompatActivity {
         }
         findViews();
         initView();
+
     }
+
+
+
 
     private void findViews() {
         mTabLayout = findViewById(R.id.tab_layout_music_player);
@@ -103,12 +109,14 @@ public class PagerActivity extends AppCompatActivity {
 
     }
 
-    private class PageAdapter extends FragmentStateAdapter {
+    public static class PageAdapter extends FragmentStateAdapter {
 
         public PageAdapter(@NonNull FragmentActivity fragmentActivity)
         {
             super(fragmentActivity);
         }
+
+
 
         @NonNull
         @Override
@@ -211,10 +219,10 @@ public class PagerActivity extends AppCompatActivity {
         } finally {
             cursor.close();
         }
-        MusicRepository musicRepository = new MusicRepository(getApplicationContext());
+        MusicRepository musicRepository = MusicRepository.getInstance(getApplicationContext());
 
-        musicRepository.storeMusicIndex(0);
-        musicRepository.storeAllMusicsList(mMusicArrayList);
+        musicRepository.setCurrentMusicIndex(0);
+        musicRepository.setAllMusicsList(mMusicArrayList);
 
 
     }
