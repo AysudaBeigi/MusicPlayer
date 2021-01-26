@@ -19,7 +19,7 @@ import com.example.musicplayer.controller.activity.MusicActivity;
 import com.example.musicplayer.controller.activity.PagerActivity;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.utilities.MusicUtils;
-import com.example.musicplayer.utilities.StorageUtils;
+import com.example.musicplayer.repository.MusicRepository;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
@@ -29,15 +29,15 @@ import java.util.ArrayList;
 public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> {
     private Context mContext;
     private ArrayList<Music> mAllMusicsList;
+    private MusicRepository mMusicRepository;
 
     public AllMusicsAdapter(Context context) {
         Log.d(PagerActivity.TAG, " AllMusicsAdapter");
 
         mContext = context;
-        mAllMusicsList = new ArrayList<>();
-        mAllMusicsList = new StorageUtils(mContext).loadMusicsList();
+        mMusicRepository=MusicRepository.getInstance(mContext);
+        mAllMusicsList = mMusicRepository.loadAllMusicsList();
 
-     //   Log.d(PagerActivity.TAG, "mAllMusicsList size :" + mAllMusicsList.size());
     }
 
     @NonNull
@@ -60,9 +60,7 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
 
     @Override
     public int getItemCount() {
-      //  Log.d(PagerActivity.TAG, "getItemCount + size" + mAllMusicsList.size());
-        if (mAllMusicsList == null)
-            return 0;
+        //  Log.d(PagerActivity.TAG, "getItemCount + size" + mAllMusicsList.size());
         return mAllMusicsList.size();
     }
 
@@ -78,9 +76,8 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    StorageUtils storageUtils = new StorageUtils(mContext);
-                    storageUtils.storeMusicIndex(mPosition);
-                    storageUtils.storeMusicsList(mAllMusicsList);
+                    mMusicRepository.storeMusicIndex(mPosition);
+                    mMusicRepository.storeAllMusicsList(mAllMusicsList);
 
                     startMusicActivity();
                 }

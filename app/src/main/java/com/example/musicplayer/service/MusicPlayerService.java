@@ -33,7 +33,7 @@ import com.example.musicplayer.controller.activity.PagerActivity;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.model.PlaybackState;
 import com.example.musicplayer.utilities.MusicUtils;
-import com.example.musicplayer.utilities.StorageUtils;
+import com.example.musicplayer.repository.MusicRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -199,9 +199,9 @@ public class MusicPlayerService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(PagerActivity.TAG, "onStartCommand");
         try {
-            StorageUtils storageUtils = new StorageUtils(getApplicationContext());
-            mMusicArrayList = storageUtils.loadMusicsList();
-            mAudioIndex = storageUtils.loadMusicIndex();
+            MusicRepository musicRepository = new MusicRepository(getApplicationContext());
+            mMusicArrayList = musicRepository.loadAllMusicsList();
+            mAudioIndex = musicRepository.loadMusicIndex();
 
             if (mAudioIndex != -1 && mAudioIndex < mMusicArrayList.size()) {
                 mActiveMusic = mMusicArrayList.get(mAudioIndex);
@@ -348,7 +348,7 @@ public class MusicPlayerService extends Service implements
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(PagerActivity.TAG," PlayNewAudioReceiver+ onReceive");
-            mAudioIndex = new StorageUtils(getApplicationContext()).loadMusicIndex();
+            mAudioIndex = new MusicRepository(getApplicationContext()).loadMusicIndex();
             if (mAudioIndex != -1 && mAudioIndex < mMusicArrayList.size()) {
                 mActiveMusic = mMusicArrayList.get(mAudioIndex);
             } else {
@@ -456,7 +456,7 @@ public class MusicPlayerService extends Service implements
         } else {
             mActiveMusic = mMusicArrayList.get(++mAudioIndex);
         }
-        new StorageUtils(getApplicationContext()).storeMusicIndex(mAudioIndex);
+        new MusicRepository(getApplicationContext()).storeMusicIndex(mAudioIndex);
         stopMedia();
         mMediaPlayer.reset();
         initMediaPLayer();
@@ -469,7 +469,7 @@ public class MusicPlayerService extends Service implements
         } else {
             mActiveMusic = mMusicArrayList.get(--mAudioIndex);
         }
-        new StorageUtils(getApplicationContext()).storeMusicIndex(mAudioIndex);
+        new MusicRepository(getApplicationContext()).storeMusicIndex(mAudioIndex);
         stopMedia();
         mMediaPlayer.reset();
         initMediaPLayer();
@@ -600,7 +600,7 @@ public class MusicPlayerService extends Service implements
         removeNotification();
         unregisterReceiver(mBecomingNoisyReceiver);
         unregisterReceiver(mPlayNewAudioReceiver);
-        new StorageUtils(getApplicationContext()).clearCashedAllMusicsList();
+        new MusicRepository(getApplicationContext()).clearCashedAllMusicsList();
 
     }
 

@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.MusicPlayer"
-        parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:windowBackground">@color/black_21</item>
 
         <!-- Primary brand color. -->
@@ -18,15 +18,7 @@
     </style>
     <style name="TextStyle">
         <item name="android:textColor">@color/white_ee</item>
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">16sp</item>
     </style>
-    <style name="Widget.AppTheme.TextInputLayout.FilledBox.Dense"
-        parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
-        <item name="errorIconDrawable">@null</item>
-        <item name="hintTextColor">@color/orange_00</item>
-        <item name="boxBackgroundColor">@color/red_36</item>
-        <item name="boxStrokeWidth">0dp</item>
-        <item name="errorTextColor">@color/red_36</item>
-        <item name="colorControlActivated">@color/red_36</item>
-    </style>
+
 </resources>

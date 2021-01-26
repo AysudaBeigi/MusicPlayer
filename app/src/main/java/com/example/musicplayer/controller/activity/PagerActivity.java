@@ -31,7 +31,7 @@ import com.example.musicplayer.controller.fragment.AllMusicsFragment;
 import com.example.musicplayer.controller.fragment.ArtistsFragment;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.service.MusicPlayerService;
-import com.example.musicplayer.utilities.StorageUtils;
+import com.example.musicplayer.repository.MusicRepository;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -211,10 +211,10 @@ public class PagerActivity extends AppCompatActivity {
         } finally {
             cursor.close();
         }
-        StorageUtils storageUtils = new StorageUtils(getApplicationContext());
+        MusicRepository musicRepository = new MusicRepository(getApplicationContext());
 
-        storageUtils.storeMusicIndex(0);
-        storageUtils.storeMusicsList(mMusicArrayList);
+        musicRepository.storeMusicIndex(0);
+        musicRepository.storeAllMusicsList(mMusicArrayList);
 
 
     }

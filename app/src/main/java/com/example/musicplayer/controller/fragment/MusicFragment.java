@@ -23,7 +23,7 @@ import com.example.musicplayer.controller.activity.PagerActivity;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.service.MusicPlayerService;
 import com.example.musicplayer.utilities.MusicUtils;
-import com.example.musicplayer.utilities.StorageUtils;
+import com.example.musicplayer.repository.MusicRepository;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
 
@@ -60,9 +60,9 @@ public class MusicFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        StorageUtils storageUtils = new StorageUtils(getActivity());
-        mMusicArrayList = storageUtils.loadMusicsList();
-        mMusicIndex = storageUtils.loadMusicIndex();
+        MusicRepository musicRepository = new MusicRepository(getActivity());
+        mMusicArrayList = musicRepository.loadAllMusicsList();
+        mMusicIndex = musicRepository.loadMusicIndex();
         mActiveMusic=mMusicArrayList.get(mMusicIndex);
     }
 
