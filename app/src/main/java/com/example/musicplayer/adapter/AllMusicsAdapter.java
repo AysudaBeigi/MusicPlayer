@@ -103,8 +103,8 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
         }
 
         private void findItemViews(@NonNull View itemView) {
-            mImageViewMusicItem = itemView.findViewById(R.id.image_view_item_music);
-            mTextViewTitle = itemView.findViewById(R.id.text_view_item_music_title);
+            mImageViewMusicItem = itemView.findViewById(R.id.image_view_music_item);
+            mTextViewTitle = itemView.findViewById(R.id.text_view_title_music_item);
         }
 
     }

@@ -111,8 +111,8 @@ public class MusicFragment extends Fragment {
     }
 
     private void findViews(View view) {
-        mTextViewTitle=view.findViewById(R.id.text_view_title);
-        mTextViewArtist=view.findViewById(R.id.text_view_artist);
+        mTextViewTitle=view.findViewById(R.id.text_view_music_fragment);
+        mTextViewArtist=view.findViewById(R.id.text_view_artist_music_fragment);
         mTextViewDuration=view.findViewById(R.id.text_view_duration);
         mTextViewTimeComeThrough=view.findViewById(R.id.text_view_time_come_through);
         mImageViewCover=view.findViewById(R.id.image_view_cover);

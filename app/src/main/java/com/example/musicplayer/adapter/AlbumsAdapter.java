@@ -27,7 +27,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.AlbumsHold
     private Context mContext;
     private MusicRepository mMusicRepository;
     private HashMap<String, ArrayList<Music>> mAlbumsHashMap;
-    private ArrayList<String> mAlbumNames;
+    private ArrayList<String> mAlbumsName;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
 
@@ -35,7 +35,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.AlbumsHold
         mContext = context;
         mMusicRepository = MusicRepository.getInstance(mContext);
         mAlbumsHashMap = mMusicRepository.getAlbums();
-        mAlbumNames = mMusicRepository.getAlbumNames();
+        mAlbumsName = mMusicRepository.getUnDuplicateAlbumsNameList();
     }
 
     @NonNull
@@ -55,7 +55,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.AlbumsHold
 
     @Override
     public int getItemCount() {
-        return mAlbumNames.size();
+        return mAlbumsName.size();
     }
 
     public class AlbumsHolder extends RecyclerView.ViewHolder {
@@ -68,7 +68,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.AlbumsHold
         public AlbumsHolder(@NonNull View itemView) {
             super(itemView);
             findItemViews(itemView);
-            mImageViewCover.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void onClick(View v) {
@@ -89,9 +89,9 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.AlbumsHold
         }
 
         public void bindView(int position) {
-            mCurrentAlbumName = mAlbumNames.get(position);
+            mCurrentAlbumName = mAlbumsName.get(position);
             mCurrentMusicArrayList=(mAlbumsHashMap.get(mCurrentAlbumName)) ;
-            mTextViewAlbum.setText(mAlbumNames.get(position));
+            mTextViewAlbum.setText(mAlbumsName.get(position));
             byte[] coverBitmap = MusicUtils.
                     retrieveCover(mCurrentMusicArrayList.get(0).getData());
             MusicUtils.setCover(mContext, coverBitmap, mImageViewCover);

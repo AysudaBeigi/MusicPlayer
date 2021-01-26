@@ -12,13 +12,9 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import android.content.SharedPreferences.Editor;
-import android.widget.ArrayAdapter;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class MusicRepository {
@@ -118,70 +114,74 @@ public class MusicRepository {
     public HashMap<String, ArrayList<Music>> getAlbums() {
         ArrayList<Music> musicArrayList = getAllMusicsList();
         HashMap<String, ArrayList<Music>> albumHashMap = new HashMap<>();
-        ArrayList<String> unDoplecateAlbumNameList =
-                getUnDoplecateAlbumNameList(musicArrayList);
-        for (int i = 0; i < unDoplecateAlbumNameList.size(); i++) {
+        ArrayList<String> unDuplicateAlbumNameList =
+                getUnDuplicateAlbumsNameList();
+        for (int i = 0; i < unDuplicateAlbumNameList.size(); i++) {
             ArrayList<Music> albumMusics = new ArrayList<>();
             for (int j = 0; j < musicArrayList.size(); j++) {
                 if (musicArrayList.get(j).getAlbum().
-                        equals(unDoplecateAlbumNameList.get(i))) {
+                        equals(unDuplicateAlbumNameList.get(i))) {
                     albumMusics.add(musicArrayList.get(j));
                 }
-
             }
-            albumHashMap.put(unDoplecateAlbumNameList.get(i), albumMusics);
-
+            albumHashMap.put(unDuplicateAlbumNameList.get(i), albumMusics);
         }
-
-
         return albumHashMap;
     }
 
-    private ArrayList<String> getUnDoplecateAlbumNameList(ArrayList<Music> musicArrayList) {
+    public ArrayList<String> getUnDuplicateAlbumsNameList() {
+        ArrayList<Music> musicArrayList = getAllMusicsList();
+
         ArrayList<String> albumList = new ArrayList<>();
         for (int i = 0; i < musicArrayList.size(); i++) {
             albumList.add(musicArrayList.get(i).getAlbum());
         }
-        ArrayList<String> albumListUnDoplecate = new ArrayList<>();
+        ArrayList<String> albumListUnDuplicate = new ArrayList<>();
         for (int i = 0; i < albumList.size(); i++) {
-            if (!albumListUnDoplecate.contains(albumList.get(i))) {
-                albumListUnDoplecate.add(albumList.get(i));
+            if (!albumListUnDuplicate.contains(albumList.get(i))) {
+                albumListUnDuplicate.add(albumList.get(i));
             }
         }
-        return albumListUnDoplecate;
+        return albumListUnDuplicate;
     }
 
-    public ArrayList<String> getAlbumNames() {
+     public HashMap<String, ArrayList<Music>> getArtists() {
         ArrayList<Music> musicArrayList = getAllMusicsList();
-        ArrayList<String> albumNames = new ArrayList<>();
-
-        for (int i = 0; i < musicArrayList.size() - 1; i++) {
-            for (int j = 1; j < musicArrayList.size(); j++) {
-                if (!musicArrayList.get(i).getAlbum()
-                        .equals(musicArrayList.get(j).getAlbum())) {
-                    albumNames.add(musicArrayList.get(i).getAlbum());
-                }
-            }
-        }
-
-        return albumNames;
-    }
-
-    public HashMap<String, Music> getArtists() {
-        ArrayList<Music> musicArrayList = getAllMusicsList();
-        HashMap<String, Music> artistHashMap = new HashMap<>();
-
-        for (int i = 0; i < musicArrayList.size(); i++) {
+        HashMap<String, ArrayList<Music>> artistHashMap = new HashMap<>();
+        ArrayList<String> unDuplicateArtistNameList =
+                getUnDuplicateAlbumsNameList();
+        for (int i = 0; i < unDuplicateArtistNameList.size(); i++) {
+            ArrayList<Music> artistMusics = new ArrayList<>();
             for (int j = 0; j < musicArrayList.size(); j++) {
-                if (!musicArrayList.get(i).getArtist()
-                        .equals(musicArrayList.get(j).getArtist())) {
-                    artistHashMap.put(musicArrayList.get(i).getArtist()
-                            , musicArrayList.get(i));
+                if (musicArrayList.get(j).getArtist().
+                        equals(unDuplicateArtistNameList.get(i))) {
+                    artistMusics.add(musicArrayList.get(j));
                 }
             }
+            artistHashMap.put(unDuplicateArtistNameList.get(i), artistMusics);
         }
         return artistHashMap;
     }
+
+    public ArrayList<String> getUnDuplicateArtistsNameList() {
+        ArrayList<Music> musicArrayList = getAllMusicsList();
+
+        ArrayList<String> artistList = new ArrayList<>();
+        for (int i = 0; i < musicArrayList.size(); i++) {
+            artistList.add(musicArrayList.get(i).getArtist());
+        }
+        ArrayList<String> artistListUnDuplicate = new ArrayList<>();
+        for (int i = 0; i < artistList.size(); i++) {
+            if (!artistListUnDuplicate.contains(artistList.get(i))) {
+                artistListUnDuplicate.add(artistList.get(i));
+            }
+        }
+        return artistListUnDuplicate;
+    }
+
+
+
+
 
     public int getCurrentMusicIndex() {
         mSharedPreferences = getSharedPreferences();

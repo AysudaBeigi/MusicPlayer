@@ -21,7 +21,7 @@
             app:srcCompat="@drawable/note" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/text_view_title"
+            android:id="@+id/text_view_music_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/image_view_short_music_fragment"
@@ -33,10 +33,10 @@
             tools:text="this is music name " />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/text_view_artist"
+            android:id="@+id/text_view_artist_music_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/text_view_title"
+            android:layout_below="@+id/text_view_music_fragment"
             android:layout_toEndOf="@+id/image_view_short_music_fragment"
             android:layout_toRightOf="@+id/image_view_short_music_fragment"
             android:gravity="center"

@@ -52,6 +52,7 @@ public class AlbumDetailFragment extends Fragment {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -65,6 +66,7 @@ public class AlbumDetailFragment extends Fragment {
         return view;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void initViews() {
         byte[] coverBitmap= MusicUtils.retrieveCover(
                 mAlbumHashMap.get(mCurrentAlbumName).get(0).getData());
