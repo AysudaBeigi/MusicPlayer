@@ -32,7 +32,7 @@ import com.example.musicplayer.R;
 import com.example.musicplayer.controller.activity.PagerActivity;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.model.PlaybackState;
-import com.example.musicplayer.utilities.AudioUtils;
+import com.example.musicplayer.utilities.MusicUtils;
 import com.example.musicplayer.utilities.StorageUtils;
 
 import java.io.IOException;
@@ -175,7 +175,7 @@ public class MusicPlayerService extends Service implements
 
     private AudioFocusRequest buildAudioFocusRequest() {
         return new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(AudioUtils.buildAudioAttributes())
+                .setAudioAttributes(MusicUtils.buildAudioAttributes())
                 .setAcceptsDelayedFocusGain(true)
                 .setWillPauseWhenDucked(true)
                 .setOnAudioFocusChangeListener(this)//setAcceptsDelayedFocusGain
@@ -439,7 +439,7 @@ public class MusicPlayerService extends Service implements
 
     private void updateMetaData() {
         Bitmap albumArt = BitmapFactory.decodeResource(getResources(),
-                R.mipmap.music_player_image);
+                R.drawable.violon);
         mMediaSession.setMetadata(new MediaMetadataCompat.Builder()
                 .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, mActiveMusic.getArtist())
@@ -488,7 +488,7 @@ public class MusicPlayerService extends Service implements
             playPauseAction = playbackAction(0);
         }
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),
-                R.mipmap.music_player_image);
+                R.drawable.violon);
         NotificationManagerCompat notificationManagerCompat =
                 NotificationManagerCompat.from(this);
 

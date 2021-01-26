@@ -2,7 +2,6 @@ package com.example.musicplayer.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +18,7 @@ import com.example.musicplayer.R;
 import com.example.musicplayer.controller.activity.MusicActivity;
 import com.example.musicplayer.controller.activity.PagerActivity;
 import com.example.musicplayer.model.Music;
+import com.example.musicplayer.utilities.MusicUtils;
 import com.example.musicplayer.utilities.StorageUtils;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
@@ -34,8 +34,10 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
         Log.d(PagerActivity.TAG, " AllMusicsAdapter");
 
         mContext = context;
+        mAllMusicsList = new ArrayList<>();
         mAllMusicsList = new StorageUtils(mContext).loadMusicsList();
 
+     //   Log.d(PagerActivity.TAG, "mAllMusicsList size :" + mAllMusicsList.size());
     }
 
     @NonNull
@@ -58,6 +60,9 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
 
     @Override
     public int getItemCount() {
+      //  Log.d(PagerActivity.TAG, "getItemCount + size" + mAllMusicsList.size());
+        if (mAllMusicsList == null)
+            return 0;
         return mAllMusicsList.size();
     }
 
@@ -77,7 +82,7 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
                     storageUtils.storeMusicIndex(mPosition);
                     storageUtils.storeMusicsList(mAllMusicsList);
 
-                    startMusicActvity();
+                    startMusicActivity();
                 }
             });
 
@@ -88,7 +93,8 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
 
             mPosition = position;
             mTextViewTitle.setText(mAllMusicsList.get(position).getTitle());
-            byte[] coverBitmap = retrieveCover(position);
+            byte[] coverBitmap = MusicUtils.
+                    retrieveCover(mAllMusicsList.get(position).getData());
             if (coverBitmap != null) {
                 Glide.with(mContext)
                         .asBitmap()
@@ -106,18 +112,12 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
 
     }
 
-    private void startMusicActvity() {
+    private void startMusicActivity() {
         Intent intent = MusicActivity.newIntent(mContext);
         mContext.startActivity(intent);
     }
 
-    private byte[] retrieveCover(int position) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(mAllMusicsList.get(position).getData());
-        byte[] coverBitmap = retriever.getEmbeddedPicture();
-        retriever.release();
-        return coverBitmap;
-    }
+
 }
 
 

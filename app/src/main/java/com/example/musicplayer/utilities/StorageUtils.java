@@ -37,6 +37,7 @@ public class StorageUtils {
     }
 
     public ArrayList<Music> loadMusicsList() {
+       // ArrayList<Music> result=new ArrayList<>();
         mSharedPreferences = getSharedPreferences();
         Gson gson = new Gson();
         String json = mSharedPreferences.getString(PREF_ALL_MUSICS_LIST, null);

@@ -31,6 +31,7 @@ import com.example.musicplayer.controller.fragment.AllMusicsFragment;
 import com.example.musicplayer.controller.fragment.ArtistsFragment;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.service.MusicPlayerService;
+import com.example.musicplayer.utilities.StorageUtils;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -61,7 +62,7 @@ public class PagerActivity extends AppCompatActivity {
         if (isPermissionGranted()) {
             loadMusic();
             Log.d(TAG, " first audio path :" + mMusicArrayList.get(0).getData());
-            playMusic(1);
+           // playMusic(1);
 
         }
         findViews();
@@ -164,7 +165,7 @@ public class PagerActivity extends AppCompatActivity {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 loadMusic();
                 Log.d(TAG, " first audio path :" + mMusicArrayList.get(0).getData());
-                playMusic(4);
+               // playMusic(4);
 
             } else {
                 requestPermission();
@@ -210,19 +211,20 @@ public class PagerActivity extends AppCompatActivity {
         } finally {
             cursor.close();
         }
+        StorageUtils storageUtils = new StorageUtils(getApplicationContext());
+
+        storageUtils.storeMusicIndex(0);
+        storageUtils.storeMusicsList(mMusicArrayList);
+
 
     }
 
     private void playMusic(int musicIndex) {
         Log.d(TAG, "playMusic");
 
-        //StorageUtils storageUtils = new StorageUtils(getApplicationContext());
         if (!mServiceBound) {
             Log.d(TAG, "playAudio + !service bound:" );
-            /*storageUtils.storeMusicIndex(musicIndex);
-            storageUtils.storeMusicsList(mMusicArrayList);
-*/
-            Intent playerIntent = MusicPlayerService.newIntent(this);
+             Intent playerIntent = MusicPlayerService.newIntent(this);
             startService(playerIntent);
             bindService(playerIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
         } else {

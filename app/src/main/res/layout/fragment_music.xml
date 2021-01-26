@@ -21,7 +21,7 @@
             app:srcCompat="@drawable/note" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/text_view_music"
+            android:id="@+id/text_view_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/image_view_short_music_fragment"
@@ -35,7 +35,7 @@
             android:id="@+id/text_view_artist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/text_view_music"
+            android:layout_below="@+id/text_view_title"
             android:layout_toEndOf="@+id/image_view_short_music_fragment"
             android:layout_toRightOf="@+id/image_view_short_music_fragment"
             android:gravity="center"
@@ -54,6 +54,25 @@
         android:layout_below="@+id/layout_introduction"
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/violon" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/text_view_time_come_through"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/seekbar_playing"
+        android:layout_alignParentLeft="true"
+        android:textColor="@color/white_ee"
+        tools:text="1:25" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/text_view_duration"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/seekbar_playing"
+        android:layout_alignParentRight="true"
+        android:textColor="@color/white_ee"
+        tools:text="12:45" />
+
 
     <androidx.appcompat.widget.AppCompatSeekBar
         android:id="@+id/seekbar_playing"

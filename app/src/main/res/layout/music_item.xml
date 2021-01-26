@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
 
     android:layout_height="wrap_content"
-    android:layout_margin="5do"
+    android:layout_margin="5dp"
     android:padding="1dp">
 
     <com.google.android.material.imageview.ShapeableImageView
@@ -24,7 +24,7 @@
         android:layout_toEndOf="@+id/image_view_item_music"
         android:layout_toRightOf="@+id/image_view_item_music"
         android:gravity="left|center_vertical"
-        android:paddingLeft="dp"
+        android:paddingLeft="2dp"
         android:textColor="@color/white_ee"
         android:textSize="16sp"
         tools:text="hello babay !!!!!!" />
