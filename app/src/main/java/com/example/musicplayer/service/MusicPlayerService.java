@@ -47,8 +47,6 @@ public class MusicPlayerService extends Service implements
         MediaPlayer.OnInfoListener,
         AudioManager.OnAudioFocusChangeListener {
 
-
-    public static final String EXTRA_MEDIA_FILE = "com.example.musicplayer.extraMedia";
     public static final String ERROR_TAG = "MediaPlayerError";
     public static final String AUDIO_PLAYER = "AudioPlayer";
     public static final String ACTION_PLAY = "com.example.musicplayer.ACTION_PLAY";
@@ -57,7 +55,6 @@ public class MusicPlayerService extends Service implements
     public static final String ACTION_NEXT = "com.example.musicplayer.ACTION_NEXT";
     public static final String ACTION_STOP = "com.example.musicplayer.ACTION_STOP";
     private static final int NOTIFICATION_ID = 100;
-    private String mMediaFile;
     private final IBinder mIBinder = new LocalBinder();
     private MediaPlayer mMediaPlayer;
     private AudioManager mAudioManager;
@@ -65,16 +62,17 @@ public class MusicPlayerService extends Service implements
     //private Handler mHandler=new Handler();
     private PhoneStateListener mPhoneStateListener;
     private TelephonyManager mTelephonyManager;
-    private ArrayList<Music> mMusicArrayList;
+    private ArrayList<Music> mCurrentMusicArrayList;
     private Music mActiveMusic;
     private MediaSessionManager mMediaSessionManager;
     private MediaSessionCompat mMediaSession;
     private MediaControllerCompat.TransportControls mTransportControls;
     private BecomingNoisyReceiver mBecomingNoisyReceiver;
     private PlayNewAudioReceiver mPlayNewAudioReceiver;
-    private int mAudioIndex = -1;
+    private int mCurrentMusicIndex = -1;
     private int mResumePosition;
     private boolean mOngoingCall = false;
+     private MusicRepository mMusicRepository;
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, MusicPlayerService.class);
@@ -91,21 +89,22 @@ public class MusicPlayerService extends Service implements
     }
 
     public class LocalBinder extends Binder {
-        public MusicPlayerService getService() {
+
+        public MusicPlayerService getService()
+        {
+            Log.d(ERROR_TAG, " getService");
+
             return MusicPlayerService.this;
         }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(ERROR_TAG, " onBind");
+
         return mIBinder;
     }
 
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        stopMedia();
-        stopSelf();
-    }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
@@ -130,18 +129,11 @@ public class MusicPlayerService extends Service implements
         return false;
     }
 
-    @Override
-    public void onPrepared(MediaPlayer mp) {
-        playMedia();
-    }
-
-    @Override
-    public void onSeekComplete(MediaPlayer mp) {
-        //Invoked indicating the completion of a seek operation.
-    }
 
     @Override
     public void onAudioFocusChange(int focusState) {
+        Log.d(PagerActivity.TAG,"onAudioFocusChange ");
+
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 if (mMediaPlayer == null) {
@@ -157,7 +149,6 @@ public class MusicPlayerService extends Service implements
                 }
                 mMediaPlayer.release();
                 mMediaPlayer = null;
-                //so next time  media player for play audio should initMedia first.
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 if (mMediaPlayer.isPlaying()) {
@@ -199,12 +190,12 @@ public class MusicPlayerService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(PagerActivity.TAG, "onStartCommand");
         try {
-            MusicRepository musicRepository =  MusicRepository.getInstance(getApplicationContext());
-            mMusicArrayList = musicRepository.getAllMusicsList();
-            mAudioIndex = musicRepository.getCurrentMusicIndex();
+           mMusicRepository =  MusicRepository.getInstance(getApplicationContext());
+            mCurrentMusicArrayList = mMusicRepository.getCurrentMusicsList();
+            mCurrentMusicIndex = mMusicRepository.getCurrentMusicIndex();
 
-            if (mAudioIndex != -1 && mAudioIndex < mMusicArrayList.size()) {
-                mActiveMusic = mMusicArrayList.get(mAudioIndex);
+            if (mCurrentMusicIndex != -1 && mCurrentMusicIndex < mCurrentMusicArrayList.size()) {
+                mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
             } else {
                 stopSelf();
             }
@@ -231,6 +222,27 @@ public class MusicPlayerService extends Service implements
         handleIncomingActions(intent);
         return super.onStartCommand(intent, flags, startId);
 
+    }
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        Log.d(PagerActivity.TAG,"onPrepared");
+
+        playMedia();
+    }
+
+    @Override
+    public void onSeekComplete(MediaPlayer mp) {
+        Log.d(PagerActivity.TAG,"onSeekComplete");
+
+        //Invoked indicating the completion of a seek operation.
+    }
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        Log.d(PagerActivity.TAG,"onCompletion");
+
+        stopMedia();
+
+        stopSelf();
     }
 
     private void initMediaPLayer() {
@@ -263,6 +275,8 @@ public class MusicPlayerService extends Service implements
     }
 
     private void stopMedia() {
+        Log.d(PagerActivity.TAG,"stopMedia");
+
         if (mMediaPlayer == null)
             return;
         if (mMediaPlayer.isPlaying()) {
@@ -302,6 +316,8 @@ public class MusicPlayerService extends Service implements
     ;
 
     private void registerBecomingNoisyReceiver() {
+        Log.d(ERROR_TAG, " registerBecomingNoisyReceiver");
+
         mBecomingNoisyReceiver = new BecomingNoisyReceiver();
         IntentFilter intentFilter =
                 new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -348,9 +364,9 @@ public class MusicPlayerService extends Service implements
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(PagerActivity.TAG," PlayNewAudioReceiver+ onReceive");
-            mAudioIndex =MusicRepository.getInstance(getApplicationContext()).getCurrentMusicIndex();
-            if (mAudioIndex != -1 && mAudioIndex < mMusicArrayList.size()) {
-                mActiveMusic = mMusicArrayList.get(mAudioIndex);
+            mCurrentMusicIndex =MusicRepository.getInstance(getApplicationContext()).getCurrentMusicIndex();
+            if (mCurrentMusicIndex != -1 && mCurrentMusicIndex < mCurrentMusicArrayList.size()) {
+                mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
             } else {
                 stopSelf();
             }
@@ -366,6 +382,8 @@ public class MusicPlayerService extends Service implements
     ;
 
     private void registerPlayNewAudioReceiver() {
+        Log.d(ERROR_TAG, " registerPlayNewAudioReceiver");
+
         mPlayNewAudioReceiver = new PlayNewAudioReceiver();
         IntentFilter intentFilter =
                 new IntentFilter(PagerActivity.ACTION_PLAY_NEW_AUDIO);
@@ -389,8 +407,12 @@ public class MusicPlayerService extends Service implements
         //set media session's  metadata
         updateMetaData();
         mMediaSession.setCallback(new MediaSessionCompat.Callback() {
+
             @Override
             public void onPlay() {
+                Log.d(PagerActivity.TAG,"initMediaSession :setCallback");
+                Log.d(PagerActivity.TAG,"initMediaSession :onPlay");
+
                 super.onPlay();
                 resumeMedia();
                 buildNotification(PlaybackState.PLAYING);
@@ -398,6 +420,8 @@ public class MusicPlayerService extends Service implements
 
             @Override
             public void onPause() {
+                Log.d(PagerActivity.TAG,"initMediaSession :onPause");
+
                 super.onPause();
                 pauseMedia();
                 buildNotification(PlaybackState.PAUSED);
@@ -406,6 +430,8 @@ public class MusicPlayerService extends Service implements
 
             @Override
             public void onSkipToNext() {
+                Log.d(PagerActivity.TAG,"initMediaSession :onSkipToNext");
+
                 super.onSkipToNext();
                 skipToNext();
                 updateMetaData();
@@ -415,6 +441,8 @@ public class MusicPlayerService extends Service implements
 
             @Override
             public void onSkipToPrevious() {
+                Log.d(PagerActivity.TAG,"initMediaSession :onSkipToPrevious");
+
                 super.onSkipToPrevious();
                 skipToPrevious();
                 updateMetaData();
@@ -424,6 +452,8 @@ public class MusicPlayerService extends Service implements
 
             @Override
             public void onStop() {
+                Log.d(PagerActivity.TAG,"initMediaSession :onStop");
+
                 super.onStop();
                 removeNotification();
                 stopSelf();
@@ -431,6 +461,8 @@ public class MusicPlayerService extends Service implements
 
             @Override
             public void onSeekTo(long position) {
+                Log.d(PagerActivity.TAG,"onSeekTo ");
+
                 super.onSeekTo(position);
             }
         });
@@ -438,6 +470,8 @@ public class MusicPlayerService extends Service implements
     }
 
     private void updateMetaData() {
+        Log.d(PagerActivity.TAG,"updateMetaData ");
+
         Bitmap albumArt = BitmapFactory.decodeResource(getResources(),
                 R.drawable.violon);
         mMediaSession.setMetadata(new MediaMetadataCompat.Builder()
@@ -450,27 +484,31 @@ public class MusicPlayerService extends Service implements
     }
 
     private void skipToNext() {
-        if (mAudioIndex == mMusicArrayList.size() - 1) {
-            mAudioIndex = 0;
-            mActiveMusic = mMusicArrayList.get(mAudioIndex);
+        Log.d(PagerActivity.TAG,"skipToNext ");
+
+        if (mCurrentMusicIndex == mCurrentMusicArrayList.size() - 1) {
+            mCurrentMusicIndex = 0;
+            mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
         } else {
-            mActiveMusic = mMusicArrayList.get(++mAudioIndex);
+            mActiveMusic = mCurrentMusicArrayList.get(++mCurrentMusicIndex);
         }
          MusicRepository.getInstance(getApplicationContext()).
-                setCurrentMusicIndex(mAudioIndex);
+                setCurrentMusicIndex(mCurrentMusicIndex);
         stopMedia();
         mMediaPlayer.reset();
         initMediaPLayer();
     }
 
     private void skipToPrevious() {
-        if (mAudioIndex == 0) {
-            mAudioIndex = mMusicArrayList.size() - 1;
-            mActiveMusic = mMusicArrayList.get(mAudioIndex);
+        Log.d(PagerActivity.TAG,"skipToPrevious ");
+
+        if (mCurrentMusicIndex == 0) {
+            mCurrentMusicIndex = mCurrentMusicArrayList.size() - 1;
+            mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
         } else {
-            mActiveMusic = mMusicArrayList.get(--mAudioIndex);
+            mActiveMusic = mCurrentMusicArrayList.get(--mCurrentMusicIndex);
         }
-         MusicRepository.getInstance(getApplicationContext()).setCurrentMusicIndex(mAudioIndex);
+         MusicRepository.getInstance(getApplicationContext()).setCurrentMusicIndex(mCurrentMusicIndex);
         stopMedia();
         mMediaPlayer.reset();
         initMediaPLayer();
@@ -522,6 +560,8 @@ public class MusicPlayerService extends Service implements
     }
 
     private void removeNotification() {
+        Log.d(PagerActivity.TAG,"removeNotification ");
+
         NotificationManagerCompat notificationManagerCompat =
                 NotificationManagerCompat.from(this);
 
@@ -529,7 +569,7 @@ public class MusicPlayerService extends Service implements
     }
 
     private PendingIntent playbackAction(int requestCode) {
-        Log.d(PagerActivity.TAG,"playbackAction");
+        Log.d(PagerActivity.TAG,"playbackAction : requestCode"+requestCode);
         Intent playbackAction =
                 new Intent(this, MusicPlayerService.class);
         switch (requestCode) {
@@ -586,6 +626,8 @@ public class MusicPlayerService extends Service implements
 
     @Override
     public void onDestroy() {
+        Log.d(PagerActivity.TAG,"onDestroy");
+
         super.onDestroy();
         if (mMediaPlayer != null) {
             stopMedia();
@@ -606,6 +648,7 @@ public class MusicPlayerService extends Service implements
     }
 
     private boolean removeAudioFocus() {
+
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
                 mAudioManager.abandonAudioFocusRequest(mFocusRequest);
     }

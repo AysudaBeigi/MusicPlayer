@@ -73,7 +73,6 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ArtistsH
                 public void onClick(View v) {
                     mMusicRepository.setCurrentArtistName(mCurrentArtistName);
                     mMusicRepository.setCurrentMusicsList(mCurrentMusicArrayList);
-
                     startArtistDetailActivity();
 
                 }

@@ -60,7 +60,6 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
 
     @Override
     public int getItemCount() {
-        //  Log.d(PagerActivity.TAG, "getItemCount + size" + mAllMusicsList.size());
         return mAllMusicsList.size();
     }
 
@@ -77,8 +76,7 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
                 @Override
                 public void onClick(View v) {
                     mMusicRepository.setCurrentMusicIndex(mPosition);
-                    mMusicRepository.setAllMusicsList(mAllMusicsList);
-
+                    mMusicRepository.setCurrentMusicsList(mAllMusicsList);
                     startMusicActivity();
                 }
             });

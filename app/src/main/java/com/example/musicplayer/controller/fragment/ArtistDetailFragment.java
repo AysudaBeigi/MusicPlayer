@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,8 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.musicplayer.R;
-import com.example.musicplayer.adapter.AlbumDetailAdapter;
-import com.example.musicplayer.adapter.ArtistDetailAdopter;
+import com.example.musicplayer.adapter.ArtistDetailAdapter;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.repository.MusicRepository;
 import com.example.musicplayer.utilities.MusicUtils;
@@ -73,7 +71,7 @@ public class ArtistDetailFragment extends Fragment {
         mRecyclerViewArtistDetail.setLayoutManager
                 (new LinearLayoutManager(getActivity()));
 
-        ArtistDetailAdopter adapter=new ArtistDetailAdopter(getActivity());
+        ArtistDetailAdapter adapter=new ArtistDetailAdapter(getActivity());
         mRecyclerViewArtistDetail.setAdapter(adapter);
     }
 

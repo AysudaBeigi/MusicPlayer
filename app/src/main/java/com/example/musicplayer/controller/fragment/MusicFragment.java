@@ -32,18 +32,18 @@ import java.util.ArrayList;
 
 public class MusicFragment extends Fragment {
     private boolean mServiceBound;
-    private ArrayList<Music> mMusicArrayList;
-    private int mMusicIndex;
+    private ArrayList<Music> mCurrentMusicArrayList;
+    private int mCurrentMusicIndex;
     private Music mActiveMusic;
     private MusicPlayerService mMusicPlayerService;
     private ShapeableImageView mImageViewCover;
-    private AppCompatSeekBar mAppCompatSeekBar;
     private MaterialTextView mTextViewTitle;
     private MaterialTextView mTextViewArtist;
+    private AppCompatSeekBar mAppCompatSeekBar;
     private MaterialTextView mTextViewDuration;
     private MaterialTextView mTextViewTimeComeThrough;
 
-    MusicRepository mMusicRepository ;
+    MusicRepository mMusicRepository;
 
 
     public MusicFragment() {
@@ -62,10 +62,10 @@ public class MusicFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMusicRepository=MusicRepository.getInstance(getActivity());
-        mMusicArrayList = mMusicRepository.getAllMusicsList();
-        mMusicIndex = mMusicRepository.getCurrentMusicIndex();
-        mActiveMusic=mMusicArrayList.get(mMusicIndex);
+        mMusicRepository = MusicRepository.getInstance(getActivity());
+        mCurrentMusicArrayList = mMusicRepository.getCurrentMusicsList();
+        mCurrentMusicIndex = mMusicRepository.getCurrentMusicIndex();
+        mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -76,47 +76,44 @@ public class MusicFragment extends Fragment {
                 container, false);
         findViews(view);
         initViews();
-
         playMusic();
         return view;
     }
 
     private void initViews() {
-        setCover();
+        byte[] coverBitmap = MusicUtils.
+                retrieveCover(mActiveMusic.getData());
+        if (coverBitmap != null)
+            MusicUtils.setCover(getContext(), coverBitmap, mImageViewCover);
         mTextViewArtist.setText(mActiveMusic.getArtist());
         mTextViewTitle.setText(mActiveMusic.getTitle());
         mTextViewDuration.setText(mActiveMusic.getDuration());
     }
 
-    private void setCover() {
-        Glide.with(this)
-                .asBitmap()
-                .load(MusicUtils.retrieveCover(mActiveMusic.getData()))
-                .into(mImageViewCover);
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void playMusic(){
-            Intent playerIntent = MusicPlayerService.newIntent(getActivity());
+    public void playMusic() {
+        Intent playerIntent = MusicPlayerService.newIntent(getActivity());
         if (!mServiceBound) {
-            Log.d(PagerActivity.TAG, "playAudio + !service bound:" );
+            Log.d(PagerActivity.TAG, "playAudio + !service bound:");
 
             getActivity().startService(playerIntent);
-            getActivity().bindService(playerIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            getActivity().bindService(playerIntent,
+                    mServiceConnection, Context.BIND_AUTO_CREATE);
         } else {
-            Log.d(PagerActivity.TAG, "playAudio + service bound:" );
-            getActivity().bindService(playerIntent,mServiceConnection,
+            Log.d(PagerActivity.TAG, "playAudio + service bound:");
+            getActivity().bindService(playerIntent, mServiceConnection,
                     Context.BIND_AUTO_CREATE);
         }
     }
 
     private void findViews(View view) {
-        mTextViewTitle=view.findViewById(R.id.text_view_music_fragment);
-        mTextViewArtist=view.findViewById(R.id.text_view_artist_music_fragment);
-        mTextViewDuration=view.findViewById(R.id.text_view_duration);
-        mTextViewTimeComeThrough=view.findViewById(R.id.text_view_time_come_through);
-        mImageViewCover=view.findViewById(R.id.image_view_cover);
-        mAppCompatSeekBar=view.findViewById(R.id.seekbar_playing);
+        mTextViewTitle = view.findViewById(R.id.text_view_music_fragment);
+        mTextViewArtist = view.findViewById(R.id.text_view_artist_music_fragment);
+        mTextViewDuration = view.findViewById(R.id.text_view_duration);
+        mTextViewTimeComeThrough = view.findViewById(R.id.text_view_time_come_through);
+        mImageViewCover = view.findViewById(R.id.image_view_cover);
+        mAppCompatSeekBar = view.findViewById(R.id.seekbar_playing);
     }
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -124,7 +121,7 @@ public class MusicFragment extends Fragment {
         @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(PagerActivity.TAG, " onServiceConnected");
+            Log.d(PagerActivity.TAG, "MusicF: onServiceConnected");
 
             MusicPlayerService.LocalBinder binder =
                     (MusicPlayerService.LocalBinder) service;

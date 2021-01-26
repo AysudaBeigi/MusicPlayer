@@ -21,15 +21,15 @@ import com.google.android.material.textview.MaterialTextView;
 
 import java.util.ArrayList;
 
-public class ArtistDetailAdopter extends
-        RecyclerView.Adapter<ArtistDetailAdopter.ArtistDetailHolder> {
+public class ArtistDetailAdapter extends
+        RecyclerView.Adapter<ArtistDetailAdapter.ArtistDetailHolder> {
 
     private Context mContext;
     private MusicRepository mMusicRepository;
     private ArrayList<Music> mArtistMusicsArrayList;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public ArtistDetailAdopter(Context context) {
+    public ArtistDetailAdapter(Context context) {
         mContext = context;
         mMusicRepository = MusicRepository.getInstance(mContext);
         mArtistMusicsArrayList = mMusicRepository.getCurrentMusicsList();
