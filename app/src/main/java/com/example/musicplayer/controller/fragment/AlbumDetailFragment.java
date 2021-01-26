@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -72,7 +73,7 @@ public class AlbumDetailFragment extends Fragment {
                 mAlbumHashMap.get(mCurrentAlbumName).get(0).getData());
         MusicUtils.setCover(getActivity(),coverBitmap,mImageViewCoverAlbumDetail);
         mRecyclerViewAlbumDetail.setLayoutManager
-                (new GridLayoutManager(getActivity(),3));
+                (new LinearLayoutManager(getActivity()));
 
         AlbumDetailAdapter adapter=new AlbumDetailAdapter(getActivity());
         mRecyclerViewAlbumDetail.setAdapter(adapter);

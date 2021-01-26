@@ -62,7 +62,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.AlbumsHold
 
         private ShapeableImageView mImageViewCover;
         private MaterialTextView mTextViewAlbum;
-         private String mCurrentAlbumName;
+        private String mCurrentAlbumName;
         private ArrayList<Music> mCurrentMusicArrayList = new ArrayList<>();
 
         public AlbumsHolder(@NonNull View itemView) {
@@ -90,11 +90,12 @@ public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.AlbumsHold
 
         public void bindView(int position) {
             mCurrentAlbumName = mAlbumsName.get(position);
-            mCurrentMusicArrayList=(mAlbumsHashMap.get(mCurrentAlbumName)) ;
+            mCurrentMusicArrayList = (mAlbumsHashMap.get(mCurrentAlbumName));
             mTextViewAlbum.setText(mAlbumsName.get(position));
             byte[] coverBitmap = MusicUtils.
                     retrieveCover(mCurrentMusicArrayList.get(0).getData());
-            MusicUtils.setCover(mContext, coverBitmap, mImageViewCover);
+            if (coverBitmap != null)
+                MusicUtils.setCover(mContext, coverBitmap, mImageViewCover);
 
         }
     }

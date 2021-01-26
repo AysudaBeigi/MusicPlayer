@@ -149,7 +149,7 @@ public class MusicRepository {
         ArrayList<Music> musicArrayList = getAllMusicsList();
         HashMap<String, ArrayList<Music>> artistHashMap = new HashMap<>();
         ArrayList<String> unDuplicateArtistNameList =
-                getUnDuplicateAlbumsNameList();
+                getUnDuplicateArtistsNameList();
         for (int i = 0; i < unDuplicateArtistNameList.size(); i++) {
             ArrayList<Music> artistMusics = new ArrayList<>();
             for (int j = 0; j < musicArrayList.size(); j++) {

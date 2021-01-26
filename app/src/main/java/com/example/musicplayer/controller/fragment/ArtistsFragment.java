@@ -35,14 +35,16 @@ public class ArtistsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
        View view= inflater.inflate(R.layout.fragment_artists,
                container, false);
+       findViews(view);
+       initViews();
        return view;
     }
     @RequiresApi(api = Build.VERSION_CODES.O)

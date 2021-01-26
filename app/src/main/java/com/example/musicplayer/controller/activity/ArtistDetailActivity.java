@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.musicplayer.R;
+import com.example.musicplayer.controller.fragment.ArtistDetailFragment;
 import com.example.musicplayer.controller.fragment.ArtistsFragment;
 
 public class ArtistDetailActivity extends SingleFragmentActivity {
@@ -18,6 +19,6 @@ public class ArtistDetailActivity extends SingleFragmentActivity {
 
     @Override
     public Fragment getFragment() {
-        return ArtistsFragment.newInstance();
+        return ArtistDetailFragment.newInstance();
     }
 }

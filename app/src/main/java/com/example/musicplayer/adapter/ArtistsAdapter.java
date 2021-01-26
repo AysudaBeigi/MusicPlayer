@@ -33,9 +33,9 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ArtistsH
     @RequiresApi(api = Build.VERSION_CODES.O)
     public ArtistsAdapter(Context context) {
         mContext = context;
-        mMusicRepository=MusicRepository.getInstance(mContext);
-        mArtistsHashMap=mMusicRepository.getArtists();
-        mArtistsName =mMusicRepository.getUnDuplicateArtistsNameList();
+        mMusicRepository = MusicRepository.getInstance(mContext);
+        mArtistsHashMap = mMusicRepository.getArtists();
+        mArtistsName = mMusicRepository.getUnDuplicateArtistsNameList();
     }
 
     @NonNull
@@ -58,7 +58,7 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ArtistsH
         return mArtistsName.size();
     }
 
-    public class ArtistsHolder extends RecyclerView.ViewHolder{
+    public class ArtistsHolder extends RecyclerView.ViewHolder {
         private ShapeableImageView mImageViewCover;
         private MaterialTextView mTextViewArtist;
         private String mCurrentArtistName;
@@ -81,22 +81,23 @@ public class ArtistsAdapter extends RecyclerView.Adapter<ArtistsAdapter.ArtistsH
         }
 
         private void findItemViews(@NonNull View itemView) {
-            mImageViewCover=itemView.findViewById(R.id.image_view_cover_artist_item);
-            mTextViewArtist=itemView.findViewById(R.id.text_view_artist_item);
+            mImageViewCover = itemView.findViewById(R.id.image_view_cover_artist_item);
+            mTextViewArtist = itemView.findViewById(R.id.text_view_artist_item);
         }
 
-        private void bindView(int position){
-            mCurrentArtistName=mArtistsName.get(position);
-            mCurrentMusicArrayList=mArtistsHashMap.get(mCurrentArtistName);
+        private void bindView(int position) {
+            mCurrentArtistName = mArtistsName.get(position);
+            mCurrentMusicArrayList = mArtistsHashMap.get(mCurrentArtistName);
             mTextViewArtist.setText(mCurrentArtistName);
-            byte[] coverBitmap=MusicUtils.
+            byte[] coverBitmap = MusicUtils.
                     retrieveCover(mCurrentMusicArrayList.get(0).getData());
-            MusicUtils.setCover(mContext,coverBitmap,mImageViewCover);
+            if (coverBitmap != null)
+                MusicUtils.setCover(mContext, coverBitmap, mImageViewCover);
         }
     }
 
     private void startArtistDetailActivity() {
-        Intent intent= ArtistDetailActivity.newIntent(mContext);
+        Intent intent = ArtistDetailActivity.newIntent(mContext);
         mContext.startActivity(intent);
     }
 }

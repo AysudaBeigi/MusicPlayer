@@ -63,16 +63,11 @@ public class PagerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pager);
         if (isPermissionGranted()) {
             loadMusic();
-            Log.d(TAG, " first audio path :" + mMusicArrayList.get(0).getData());
-           // playMusic(1);
-
         }
         findViews();
         initView();
 
     }
-
-
 
 
     private void findViews() {
@@ -111,11 +106,10 @@ public class PagerActivity extends AppCompatActivity {
 
     public static class PageAdapter extends FragmentStateAdapter {
 
-        public PageAdapter(@NonNull FragmentActivity fragmentActivity)
-        {
+        public PageAdapter(@NonNull FragmentActivity fragmentActivity) {
+
             super(fragmentActivity);
         }
-
 
 
         @NonNull
@@ -172,9 +166,6 @@ public class PagerActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 loadMusic();
-                Log.d(TAG, " first audio path :" + mMusicArrayList.get(0).getData());
-               // playMusic(4);
-
             } else {
                 requestPermission();
             }
@@ -227,24 +218,6 @@ public class PagerActivity extends AppCompatActivity {
 
     }
 
-    private void playMusic(int musicIndex) {
-        Log.d(TAG, "playMusic");
-
-        if (!mServiceBound) {
-            Log.d(TAG, "playAudio + !service bound:" );
-             Intent playerIntent = MusicPlayerService.newIntent(this);
-            startService(playerIntent);
-            bindService(playerIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-        } else {
-            Log.d(TAG, "playAudio + service bound:" );
-
-           // storageUtils.storeMusicIndex(musicIndex);
-            Intent broadcastIntent = new Intent(ACTION_PLAY_NEW_AUDIO);
-            sendBroadcast(broadcastIntent);
-
-        }
-    }
-
     private ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
@@ -255,9 +228,6 @@ public class PagerActivity extends AppCompatActivity {
                     (MusicPlayerService.LocalBinder) service;
             mMusicPlayerService = binder.getService();
             mServiceBound = true;
-
-            Toast.makeText(PagerActivity.this,
-                    "Service bound", Toast.LENGTH_LONG).show();
 
         }
 
@@ -271,11 +241,11 @@ public class PagerActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        Log.d(PagerActivity.TAG,"onDestroy");
+        Log.d(PagerActivity.TAG, "onDestroy");
 
         super.onDestroy();
         if (mServiceBound) {
-            Log.d(PagerActivity.TAG,"unbindService");
+            Log.d(PagerActivity.TAG, "unbindService");
 
             unbindService(mServiceConnection);
             mMusicPlayerService.stopSelf();
