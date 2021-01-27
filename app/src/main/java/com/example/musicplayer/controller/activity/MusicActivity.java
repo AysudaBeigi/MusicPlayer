@@ -71,7 +71,7 @@ public class MusicActivity extends AppCompatActivity {
 
     private void resetPlayPauseState() {
         mMusicRepository.setPlayPauseSate("play");
-        mImageViewPlayPause.setImageResource(R.drawable.violon);
+        mImageViewPlayPause.setImageResource(R.drawable.pause);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class MusicActivity extends AppCompatActivity {
         Log.d(PagerActivity.TAG, "MusicActivity : onStart ");
         Intent serviceIntent = MusicPlayerService.newIntent(this);
         bindService(serviceIntent, mServiceConnection, BIND_AUTO_CREATE);
-        initViews();
+        // initViews();
 
         super.onStart();
 
@@ -163,12 +163,12 @@ public class MusicActivity extends AppCompatActivity {
                 Log.d(PagerActivity.TAG, "getPlayPauseSate is " +
                         mMusicRepository.getPlayPauseSate());
                 if (mMusicRepository.getPlayPauseSate().equals("play")) {
-                    Log.d(PagerActivity.TAG,"state is play");
+                    Log.d(PagerActivity.TAG, "state is play");
                     mMusicRepository.setPlayPauseSate("pause");
                     mImageViewPlayPause.setImageResource(R.drawable.play);
                     mMusicPlayerService.onPause();
                 } else {
-                    Log.d(PagerActivity.TAG,"state is pause");
+                    Log.d(PagerActivity.TAG, "state is pause");
 
                     mMusicRepository.setPlayPauseSate("play");
                     mImageViewPlayPause.setImageResource(R.drawable.pause);
@@ -182,10 +182,7 @@ public class MusicActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void initViews() {
         resetPlayPauseState();
-        mServiceBound = mMusicRepository.getServiceBound();
-        mCurrentMusicArrayList = mMusicRepository.getCurrentMusicsList();
-        mCurrentMusicIndex = mMusicRepository.getCurrentMusicIndex();
-        mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
+        initData();
         byte[] coverBitmap = MusicUtils.
                 retrieveCover(mActiveMusic.getData());
         if (coverBitmap != null)
@@ -194,19 +191,23 @@ public class MusicActivity extends AppCompatActivity {
             mImageViewCover.setImageResource(R.drawable.violon);
         mTextViewArtist.setText(mActiveMusic.getArtist());
         mTextViewTitle.setText(mActiveMusic.getTitle());
-        mTextViewDuration.setText(mActiveMusic.getDuration());
-        if (mMusicPlayerService == null)
-            Log.d(PagerActivity.TAG, "mMusicPlayerService==null");
-        if (mMusicPlayerService != null) {
+        int duration = Integer.parseInt(mActiveMusic.getDuration()) / 1000;
+        mTextViewDuration.setText(SeekbarUtils.getProgressTimeFormat(duration));
+        mAppCompatSeekBar.setMax(mMusicPlayerService.getMediaDuration() / 1000);
+        Log.d(PagerActivity.TAG, "mMusicPlayerService is not null ");
+        int currentPosition = mMusicPlayerService.getMediaCurrentPosition() / 1000;
+        mAppCompatSeekBar.setProgress(currentPosition);
+        mTextViewDurationPlayed.
+                setText(SeekbarUtils.getProgressTimeFormat(currentPosition));
 
-            Log.d(PagerActivity.TAG, "mMusicPlayerService is not null ");
-            int currentPosition = mMusicPlayerService.getMediaCurrentPosition() / 1000;
-            mAppCompatSeekBar.setProgress(currentPosition);
-            mTextViewDurationPlayed.
-                    setText(SeekbarUtils.getProgressPlayedTimeFormat(currentPosition));
 
-        }
+    }
 
+    private void initData() {
+        mServiceBound = mMusicRepository.getServiceBound();
+        mCurrentMusicArrayList = mMusicRepository.getCurrentMusicsList();
+        mCurrentMusicIndex = mMusicRepository.getCurrentMusicIndex();
+        mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
     }
 
 
@@ -236,10 +237,6 @@ public class MusicActivity extends AppCompatActivity {
                     (MusicPlayerService.LocalBinder) service;
             mMusicPlayerService = binder.getService();
             mMusicRepository.setServiceBound(true);
-            if (mMusicPlayerService == null)
-                Log.d(PagerActivity.TAG, "MusicActivity: mMusicPlayerService is null!!");
-            else
-                Log.d(PagerActivity.TAG, "MusicActivity: mMusicPlayerService is not null");
 
             initViews();
 

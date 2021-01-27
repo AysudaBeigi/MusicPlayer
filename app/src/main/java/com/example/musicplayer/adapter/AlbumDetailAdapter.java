@@ -32,7 +32,7 @@ public class AlbumDetailAdapter extends
     public AlbumDetailAdapter(Context context) {
         mContext = context;
         mMusicRepository = MusicRepository.getInstance(mContext);
-        mAlbumMusicsArrayList=mMusicRepository.getCurrentMusicsList();
+        mAlbumMusicsArrayList = mMusicRepository.getCurrentMusicsList();
 
     }
 
@@ -59,6 +59,7 @@ public class AlbumDetailAdapter extends
         private ShapeableImageView mImageViewMusicItem;
         private MaterialTextView mTextViewTitleMusicItem;
         private int mPosition;
+
         public AlbumDetailHolder(@NonNull View itemView) {
             super(itemView);
             findItemViews(itemView);
@@ -78,18 +79,21 @@ public class AlbumDetailAdapter extends
             mImageViewMusicItem = itemView.findViewById(R.id.image_view_music_item);
             mTextViewTitleMusicItem = itemView.findViewById(R.id.text_view_title_music_item);
         }
-        private void binItemViews(int position){
-            mPosition=position;
+
+        private void binItemViews(int position) {
+            mPosition = position;
             mTextViewTitleMusicItem.setText(mAlbumMusicsArrayList.get(position).getTitle());
-            byte[] coverBitmap=MusicUtils.
+            byte[] coverBitmap = MusicUtils.
                     retrieveCover(mAlbumMusicsArrayList.get(position).getData());
-            MusicUtils.setCover(mContext,coverBitmap,mImageViewMusicItem);
+            if (coverBitmap != null)
+                MusicUtils.setCover(mContext, coverBitmap, mImageViewMusicItem);
 
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void startMusicActivity() {
-        Intent intent= MusicActivity.newIntent(mContext);
+        Intent intent = MusicActivity.newIntent(mContext);
         mContext.startActivity(intent);
     }
 }

@@ -74,23 +74,28 @@ public class ArtistDetailAdapter extends
             });
 
         }
+
         private void findItemViews(@NonNull View itemView) {
             mImageViewMusicItem = itemView.findViewById(R.id.image_view_music_item);
             mTextViewTitleMusicItem = itemView.findViewById(R.id.text_view_title_music_item);
         }
-        private void binItemViews(int position){
-            mPosition=position;
+
+        private void binItemViews(int position) {
+            mPosition = position;
             mTextViewTitleMusicItem.
                     setText(mArtistMusicsArrayList.get(position).getTitle());
-            byte[] coverBitmap= MusicUtils.
+            byte[] coverBitmap = MusicUtils.
                     retrieveCover(mArtistMusicsArrayList.get(position).getData());
-            MusicUtils.setCover(mContext,coverBitmap,mImageViewMusicItem);
+            if (coverBitmap != null)
+                MusicUtils.setCover(mContext, coverBitmap, mImageViewMusicItem);
 
         }
 
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void startMusicActivity() {
-        Intent intent= MusicActivity.newIntent(mContext);
+        Intent intent = MusicActivity.newIntent(mContext);
         mContext.startActivity(intent);
     }
 }

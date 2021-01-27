@@ -30,6 +30,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.musicplayer.R;
+import com.example.musicplayer.controller.activity.MusicActivity;
 import com.example.musicplayer.controller.activity.PagerActivity;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.model.PlaybackState;
@@ -160,6 +161,9 @@ public class MusicPlayerService extends Service implements
 
     public int getMediaCurrentPosition() {
         return mMediaPlayer.getCurrentPosition();
+    }
+    public int getMediaDuration(){
+        return mMediaPlayer.getDuration();
     }
 
     private void initMediaPLayer() {
@@ -422,6 +426,7 @@ public class MusicPlayerService extends Service implements
                 R.drawable.violon);
         NotificationManagerCompat notificationManagerCompat =
                 NotificationManagerCompat.from(this);
+
 
         Notification notification =
                 new NotificationCompat.Builder(

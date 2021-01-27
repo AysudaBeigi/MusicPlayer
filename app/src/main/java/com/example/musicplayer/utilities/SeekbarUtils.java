@@ -1,7 +1,7 @@
 package com.example.musicplayer.utilities;
 
 public class SeekbarUtils {
-    public static String getProgressPlayedTimeFormat(int mCurrentPosition) {
+    public static String getProgressTimeFormat(int mCurrentPosition) {
         int second = mCurrentPosition % 60;
         int minute = mCurrentPosition / 60;
         return getTimeFormat(minute) + ":" + getTimeFormat(second);

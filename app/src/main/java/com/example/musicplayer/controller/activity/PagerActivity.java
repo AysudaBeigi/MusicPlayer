@@ -59,16 +59,15 @@ public class PagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pager);
 
-        if (isPermissionGranted()) {
-            loadMusic();
-        }
-
         findViews();
-        initView();
-
-
+        if (!isPermissionGranted()) {
+            requestPermission();
+        }
+        else {
+            loadMusic();
+            initView();
+        }
     }
-
 
     private void findViews() {
         mTabLayout = findViewById(R.id.tab_layout_music_player);
@@ -134,24 +133,11 @@ public class PagerActivity extends AppCompatActivity {
 
     }
 
-   /* @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean(BUNDLE_SERVICE_STATE, mServiceBound);
-        super.onSaveInstanceState(savedInstanceState);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        mServiceBound = savedInstanceState.getBoolean(BUNDLE_SERVICE_STATE);
-    }*/
-
     private boolean isPermissionGranted() {
 
         if (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            requestPermission();
             return false;
 
         }
@@ -166,6 +152,7 @@ public class PagerActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 loadMusic();
+                initView();
             } else {
                 requestPermission();
             }
@@ -219,40 +206,5 @@ public class PagerActivity extends AppCompatActivity {
 
     }
 
-   /* private ServiceConnection mServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, " PagerActivity :onServiceConnected");
-
-            MusicPlayerService.LocalBinder binder =
-                    (MusicPlayerService.LocalBinder) service;
-            mMusicPlayerService = binder.getService();
-            mServiceBound = true;
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-            Log.d(TAG, " PagerActivity :onServiceDisconnected");
-            mServiceBound = false;
-        }
-    };
-
-
-    @Override
-    protected void onDestroy() {
-        Log.d(PagerActivity.TAG, "PagerActivity :onDestroy");
-
-        super.onDestroy();
-        if (mServiceBound) {
-            Log.d(PagerActivity.TAG, " PagerActivity : unbindService");
-            Log.d(PagerActivity.TAG, "PagerActivity :stopSelf ");
-
-            unbindService(mServiceConnection);
-            mMusicPlayerService.stopSelf();
-        }
-    }*/
 
 }
