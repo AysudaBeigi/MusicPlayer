@@ -44,7 +44,6 @@ public class MusicPlayerService extends Service implements
         MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener,
         MediaPlayer.OnErrorListener,
-        MediaPlayer.OnSeekCompleteListener,
         AudioManager.OnAudioFocusChangeListener {
 
     public static final String ERROR_TAG = "MediaPlayerError";
@@ -69,8 +68,6 @@ public class MusicPlayerService extends Service implements
     private MediaSessionManager mMediaSessionManager;
     private MediaSessionCompat mMediaSession;
     private MediaControllerCompat.TransportControls mTransportControls;
-    // private BecomingNoisyReceiver mBecomingNoisyReceiver;
-    // private PlayNewAudioReceiver mPlayNewAudioReceiver;
     private int mCurrentMusicIndex = -1;
     private int mResumePosition;
     private boolean mOngoingCall = false;
@@ -86,8 +83,6 @@ public class MusicPlayerService extends Service implements
         super.onCreate();
         Log.d(ERROR_TAG, "onCreate MediaPlayerService");
         // callStateListener();
-        //registerBecomingNoisyReceiver();
-        // registerPlayNewAudioReceiver();
     }
 
 
@@ -116,11 +111,9 @@ public class MusicPlayerService extends Service implements
             mCurrentMusicArrayList = mMusicRepository.getCurrentMusicsList();
             mCurrentMusicIndex = mMusicRepository.getCurrentMusicIndex();
 
-            if (mCurrentMusicIndex != -1 && mCurrentMusicIndex < mCurrentMusicArrayList.size()) {
-                mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
-            } else {
-                stopSelf();
-            }
+            mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
+
+
         } catch (NullPointerException e) {
             stopSelf();
 
@@ -133,7 +126,6 @@ public class MusicPlayerService extends Service implements
         if (mMediaSessionManager == null) {
             try {
                 initMediaSession();
-                initMediaPLayer();
             } catch (RemoteException e) {
                 e.printStackTrace();
                 stopSelf();
@@ -141,8 +133,9 @@ public class MusicPlayerService extends Service implements
             buildNotification(PlaybackState.PLAYING);
         }
 
+        initMediaPLayer();
         handleIncomingActions(intent);
-        return START_STICKY;
+        return super.onStartCommand(intent, flags, startId);
 
     }
 
@@ -152,23 +145,14 @@ public class MusicPlayerService extends Service implements
         playMedia();
     }
 
-    @Override
-    public void onSeekComplete(MediaPlayer mp) {
-        Log.d(PagerActivity.TAG, "onSeekComplete");
-
-        //Invoked indicating the completion of a seek operation.
-    }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         Log.d(PagerActivity.TAG, "onCompletion");
-        stopMedia();
+        nextMediaPlay();
 
     }
 
-    public void playNextMedia() {
-
-    }
 
     public void seekMedia(int progress) {
         mMediaPlayer.seekTo(progress);
@@ -185,7 +169,6 @@ public class MusicPlayerService extends Service implements
         mMediaPlayer.setOnCompletionListener(this);
         mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.setOnPreparedListener(this);
-        mMediaPlayer.setOnSeekCompleteListener(this);
         mMediaPlayer.reset();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setWakeMode(getApplicationContext(),
@@ -337,7 +320,7 @@ public class MusicPlayerService extends Service implements
                 Log.d(PagerActivity.TAG, "initMediaSession :onSkipToPrevious");
 
                 super.onSkipToPrevious();
-               previousMediaPlay();
+                previousMediaPlay();
             }
 
             @Override
@@ -392,18 +375,18 @@ public class MusicPlayerService extends Service implements
             mActiveMusic = mCurrentMusicArrayList.get(randomIndex);
         } else {
 
-            switch (nextPrevious){
+            switch (nextPrevious) {
                 case 100://next
-            if (mCurrentMusicIndex == mCurrentMusicArrayList.size() - 1) {
-                mCurrentMusicIndex = 0;
-                mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
-            } else {
-                mActiveMusic = mCurrentMusicArrayList.get(++mCurrentMusicIndex);
-            }
-               break;
+                    if (mCurrentMusicIndex == mCurrentMusicArrayList.size() - 1) {
+                        mCurrentMusicIndex = 0;
+                        mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
+                    } else {
+                        mActiveMusic = mCurrentMusicArrayList.get(++mCurrentMusicIndex);
+                    }
+                    break;
                 case 200://prevois
                     if (mCurrentMusicIndex == 0) {
-                        mCurrentMusicIndex =mCurrentMusicArrayList.size()-1;
+                        mCurrentMusicIndex = mCurrentMusicArrayList.size() - 1;
                         mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
                     } else {
                         mActiveMusic = mCurrentMusicArrayList.get(--mCurrentMusicIndex);
@@ -416,7 +399,7 @@ public class MusicPlayerService extends Service implements
     private void skipToPrevious() {
         Log.d(PagerActivity.TAG, "skipToPrevious ");
 
-       checkMusicState(PREVIOUS);
+        checkMusicState(PREVIOUS);
         mMusicRepository.setCurrentMusicIndex(mCurrentMusicIndex);
         stopMedia();
         mMediaPlayer.reset();
@@ -544,15 +527,12 @@ public class MusicPlayerService extends Service implements
             mMediaPlayer.release();
         }
         removeAudioFocus();
-        //stop listening  to incoming calls and release TelephonyManager
         if (mPhoneStateListener != null) {
             mTelephonyManager.listen(mPhoneStateListener,
                     PhoneStateListener.LISTEN_NONE);
         }
 
         removeNotification();
-        // unregisterReceiver(mBecomingNoisyReceiver);
-        //unregisterReceiver(mPlayNewAudioReceiver);
         MusicRepository.getInstance(getApplicationContext()).clearCashedAllMusicsList();
 
     }

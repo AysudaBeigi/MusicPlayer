@@ -26,6 +26,8 @@ import com.google.android.material.textview.MaterialTextView;
 
 import java.util.ArrayList;
 
+@RequiresApi(api = Build.VERSION_CODES.O)
+
 public class MusicActivity extends AppCompatActivity {
 
 
@@ -53,23 +55,33 @@ public class MusicActivity extends AppCompatActivity {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(PagerActivity.TAG, "MusicActivity : onCreate ");
+
         setContentView(R.layout.activity_music);
+        startService(MusicPlayerService.newIntent(this));
         mMusicRepository = MusicRepository.getInstance(this);
         findViews();
-        initViews();
+        resetPlayPauseState();
         setListeners();
-        //  playMusic();
+
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void resetPlayPauseState() {
+        mMusicRepository.setPlayPauseSate("play");
+        mImageViewPlayPause.setImageResource(R.drawable.violon);
+    }
+
     @Override
     protected void onStart() {
+        Log.d(PagerActivity.TAG, "MusicActivity : onStart ");
+        Intent serviceIntent = MusicPlayerService.newIntent(this);
+        bindService(serviceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        initViews();
+
         super.onStart();
-        playMusic();
 
     }
 
@@ -77,10 +89,9 @@ public class MusicActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         unbindService(mServiceConnection);
-        mServiceBound = false;
+        mMusicRepository.setServiceBound(false);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
 
     private void setListeners() {
         mAppCompatSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -149,12 +160,18 @@ public class MusicActivity extends AppCompatActivity {
         mImageViewPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mMusicRepository.getPlayPauseSate().equals("play")){
+                Log.d(PagerActivity.TAG, "getPlayPauseSate is " +
+                        mMusicRepository.getPlayPauseSate());
+                if (mMusicRepository.getPlayPauseSate().equals("play")) {
+                    Log.d(PagerActivity.TAG,"state is play");
                     mMusicRepository.setPlayPauseSate("pause");
+                    mImageViewPlayPause.setImageResource(R.drawable.play);
                     mMusicPlayerService.onPause();
-                }
-                else{
+                } else {
+                    Log.d(PagerActivity.TAG,"state is pause");
+
                     mMusicRepository.setPlayPauseSate("play");
+                    mImageViewPlayPause.setImageResource(R.drawable.pause);
                     mMusicPlayerService.onPlay();
                 }
             }
@@ -164,6 +181,7 @@ public class MusicActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void initViews() {
+        resetPlayPauseState();
         mServiceBound = mMusicRepository.getServiceBound();
         mCurrentMusicArrayList = mMusicRepository.getCurrentMusicsList();
         mCurrentMusicIndex = mMusicRepository.getCurrentMusicIndex();
@@ -172,10 +190,16 @@ public class MusicActivity extends AppCompatActivity {
                 retrieveCover(mActiveMusic.getData());
         if (coverBitmap != null)
             MusicUtils.setCover(this, coverBitmap, mImageViewCover);
+        else
+            mImageViewCover.setImageResource(R.drawable.violon);
         mTextViewArtist.setText(mActiveMusic.getArtist());
         mTextViewTitle.setText(mActiveMusic.getTitle());
         mTextViewDuration.setText(mActiveMusic.getDuration());
-        if (mServiceBound) {
+        if (mMusicPlayerService == null)
+            Log.d(PagerActivity.TAG, "mMusicPlayerService==null");
+        if (mMusicPlayerService != null) {
+
+            Log.d(PagerActivity.TAG, "mMusicPlayerService is not null ");
             int currentPosition = mMusicPlayerService.getMediaCurrentPosition() / 1000;
             mAppCompatSeekBar.setProgress(currentPosition);
             mTextViewDurationPlayed.
@@ -186,18 +210,8 @@ public class MusicActivity extends AppCompatActivity {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void playMusic() {
-        Log.d(PagerActivity.TAG, "playAudio + !service bound:");
-        Intent serviceIntent = MusicPlayerService.newIntent(this);
-        bindService(serviceIntent, mServiceConnection, BIND_AUTO_CREATE);
-        // mMusicPlayerService.playMedia();
-        //startService(MusicPlayerService.newIntent(this));
-        //  stopService()
-
-    }
-
     private void findViews() {
+
         mTextViewTitle = findViewById(R.id.text_view_music_fragment);
         mTextViewArtist = findViewById(R.id.text_view_artist_music_fragment);
         mTextViewDuration = findViewById(R.id.text_view_duration);
@@ -216,12 +230,18 @@ public class MusicActivity extends AppCompatActivity {
         @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(PagerActivity.TAG, "MusicF: onServiceConnected");
+            Log.d(PagerActivity.TAG, "MusicActivity: onServiceConnected");
 
             MusicPlayerService.LocalBinder binder =
                     (MusicPlayerService.LocalBinder) service;
             mMusicPlayerService = binder.getService();
             mMusicRepository.setServiceBound(true);
+            if (mMusicPlayerService == null)
+                Log.d(PagerActivity.TAG, "MusicActivity: mMusicPlayerService is null!!");
+            else
+                Log.d(PagerActivity.TAG, "MusicActivity: mMusicPlayerService is not null");
+
+            initViews();
 
         }
 

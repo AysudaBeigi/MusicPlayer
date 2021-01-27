@@ -58,11 +58,14 @@ public class PagerActivity extends AppCompatActivity {
         Log.d(TAG, "MainActivity : onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pager);
+
         if (isPermissionGranted()) {
             loadMusic();
         }
+
         findViews();
         initView();
+
 
     }
 

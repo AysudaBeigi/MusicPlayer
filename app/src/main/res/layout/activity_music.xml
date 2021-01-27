@@ -78,8 +78,7 @@
             android:layout_below="@+id/seekbar_playing"
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
-            android:textColor="@color/white_ee"
-            tools:text="1:25" />
+            android:textColor="@color/white_ee" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/text_view_duration"
@@ -88,8 +87,7 @@
             android:layout_below="@+id/seekbar_playing"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:textColor="@color/white_ee"
-            tools:text="12:45" />
+            android:textColor="@color/white_ee" />
     </RelativeLayout>
 
     <RelativeLayout
