@@ -45,12 +45,9 @@ import android.provider.MediaStore.Audio.Media;
 
 public class PagerActivity extends AppCompatActivity {
     public static final String TAG = "MusicPlayerMainActivity";
-    public static final String BUNDLE_SERVICE_STATE = "ServiceState";
-    public static final String ACTION_PLAY_NEW_AUDIO =
-            "com.example.musicplayer.ACTION_PLAY_NEW_AUDIO";
     private static final int REQUEST_CODE = 1;
-    private MusicPlayerService mMusicPlayerService;
-    private boolean mServiceBound = false;
+    public static final String BUNDLE_SERVICE_STATE = "ServiceState";
+    //private boolean mServiceBound = false;
     private ArrayList<Music> mMusicArrayList;
     private TabLayout mTabLayout;
     private ViewPager2 mViewPager;
@@ -134,7 +131,7 @@ public class PagerActivity extends AppCompatActivity {
 
     }
 
-    @Override
+   /* @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putBoolean(BUNDLE_SERVICE_STATE, mServiceBound);
         super.onSaveInstanceState(savedInstanceState);
@@ -144,7 +141,7 @@ public class PagerActivity extends AppCompatActivity {
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mServiceBound = savedInstanceState.getBoolean(BUNDLE_SERVICE_STATE);
-    }
+    }*/
 
     private boolean isPermissionGranted() {
 
@@ -210,7 +207,8 @@ public class PagerActivity extends AppCompatActivity {
         } finally {
             cursor.close();
         }
-        MusicRepository musicRepository = MusicRepository.getInstance(getApplicationContext());
+        MusicRepository musicRepository =
+                MusicRepository.getInstance(getApplicationContext());
 
         musicRepository.setCurrentMusicIndex(0);
         musicRepository.setAllMusicsList(mMusicArrayList);
@@ -218,11 +216,11 @@ public class PagerActivity extends AppCompatActivity {
 
     }
 
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
+   /* private ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, " onServiceConnected");
+            Log.d(TAG, " PagerActivity :onServiceConnected");
 
             MusicPlayerService.LocalBinder binder =
                     (MusicPlayerService.LocalBinder) service;
@@ -234,6 +232,7 @@ public class PagerActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
 
+            Log.d(TAG, " PagerActivity :onServiceDisconnected");
             mServiceBound = false;
         }
     };
@@ -241,14 +240,16 @@ public class PagerActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        Log.d(PagerActivity.TAG, "onDestroy");
+        Log.d(PagerActivity.TAG, "PagerActivity :onDestroy");
 
         super.onDestroy();
         if (mServiceBound) {
-            Log.d(PagerActivity.TAG, "unbindService");
+            Log.d(PagerActivity.TAG, " PagerActivity : unbindService");
+            Log.d(PagerActivity.TAG, "PagerActivity :stopSelf ");
 
             unbindService(mServiceConnection);
             mMusicPlayerService.stopSelf();
         }
-    }
+    }*/
+
 }

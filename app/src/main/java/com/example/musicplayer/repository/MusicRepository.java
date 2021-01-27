@@ -18,13 +18,15 @@ import android.content.SharedPreferences.Editor;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class MusicRepository {
-
-    public static final String PREF_STORAGE = "om.example.musicplayer.sharedPreferencesStorage";
     public static final String PREF_ALL_MUSICS_LIST = "prefAllMusicsList";
     public static final String PREF_CURRENT_MUSIC_INDEX = "prefMusicIndex";
     private static final String PREF_ALL_CURRENT_MUSICS_LIST = "prefCurrentMusicsList";
     private static final String PREF_CURRENT_ALBUM_NAME = "prefCurrentAlbumName";
     private static final String PREF_CURRENT_ARTIST_NAME = "prefCurrentArtistName";
+    public static final String PREF_SHUFFLE_STATE = "prefShuffleState";
+    public static final String PREF_REPEAT_STATE = "prefRepeatState";
+    public static final String PREF_SERVICE_BOUND = "prefServiceBound";
+    public static final String PREF_PLAY_PAUSE_STATE = "prefPlayPauseState";
     private SharedPreferences mSharedPreferences;
     private Context mContext;
     private static MusicRepository sInstance;
@@ -42,7 +44,7 @@ public class MusicRepository {
     }
 
     public void setAllMusicsList(ArrayList<Music> musicArrayList) {
-        mSharedPreferences = getSharedPreferences();
+        mSharedPreferences = getSharedPreferences(PREF_ALL_MUSICS_LIST);
         Editor editor = mSharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(musicArrayList);
@@ -53,7 +55,7 @@ public class MusicRepository {
 
 
     public void setCurrentMusicsList(ArrayList<Music> musicArrayList) {
-        mSharedPreferences = getSharedPreferences();
+        mSharedPreferences = getSharedPreferences(PREF_ALL_CURRENT_MUSICS_LIST);
         Editor editor = mSharedPreferences.edit();
         Gson gson = new Gson();
         String json = gson.toJson(musicArrayList);
@@ -63,14 +65,14 @@ public class MusicRepository {
     }
 
     public void setCurrentMusicIndex(int currentMusicIndex) {
-        getSharedPreferences().edit().
+        getSharedPreferences(PREF_CURRENT_MUSIC_INDEX).edit().
                 putInt(PREF_CURRENT_MUSIC_INDEX, currentMusicIndex)
                 .apply();
 
     }
 
     public void setCurrentAlbumName(String currentAlbumName) {
-        getSharedPreferences().edit().
+        getSharedPreferences(PREF_CURRENT_ALBUM_NAME).edit().
                 putString(PREF_CURRENT_ALBUM_NAME, currentAlbumName)
                 .apply();
 
@@ -78,15 +80,65 @@ public class MusicRepository {
 
 
     public void setCurrentArtistName(String currentArtistName) {
-        getSharedPreferences().edit().
+        getSharedPreferences(PREF_CURRENT_ARTIST_NAME).edit().
                 putString(PREF_CURRENT_ARTIST_NAME, currentArtistName)
                 .apply();
 
     }
 
+    public void setShuffleState(boolean state) {
+        mSharedPreferences = getSharedPreferences(PREF_SHUFFLE_STATE);
+        mSharedPreferences.edit().putBoolean(PREF_SHUFFLE_STATE, state)
+                .apply();
+
+    }
+
+    public boolean getShuffleState() {
+        mSharedPreferences = getSharedPreferences(PREF_SHUFFLE_STATE);
+        return mSharedPreferences.getBoolean(PREF_SHUFFLE_STATE, false);
+    }
+
+    public void setRepeatState(boolean state) {
+        mSharedPreferences = getSharedPreferences(PREF_REPEAT_STATE);
+        mSharedPreferences.edit().putBoolean(PREF_REPEAT_STATE, state)
+                .apply();
+
+    }
+
+    public boolean getRepeatState() {
+        mSharedPreferences = getSharedPreferences(PREF_REPEAT_STATE);
+        return mSharedPreferences.getBoolean(PREF_REPEAT_STATE, false);
+    }
+    public void setServiceBound(boolean state) {
+        mSharedPreferences = getSharedPreferences(PREF_SERVICE_BOUND);
+        mSharedPreferences.edit().putBoolean(PREF_SERVICE_BOUND, state)
+                .apply();
+
+    }
+
+    public boolean getServiceBound() {
+        mSharedPreferences = getSharedPreferences(PREF_SERVICE_BOUND);
+        return mSharedPreferences.getBoolean(PREF_SERVICE_BOUND, false);
+    }
+     public void setPlayPauseSate(String state) {
+        mSharedPreferences = getSharedPreferences(PREF_PLAY_PAUSE_STATE);
+        mSharedPreferences.edit().putString(PREF_PLAY_PAUSE_STATE, state)
+                .apply();
+
+    }
+
+    public String  getPlayPauseSate() {
+        mSharedPreferences = getSharedPreferences(PREF_PLAY_PAUSE_STATE);
+        return mSharedPreferences.getString(PREF_PLAY_PAUSE_STATE, "play");
+    }
+
+
+
+
+
     public ArrayList<Music> getAllMusicsList() {
         ArrayList<Music> result = new ArrayList<>();
-        mSharedPreferences = getSharedPreferences();
+        mSharedPreferences = getSharedPreferences(PREF_ALL_MUSICS_LIST);
         Gson gson = new Gson();
         String json = mSharedPreferences.getString(PREF_ALL_MUSICS_LIST, null);
         Type type = new TypeToken<ArrayList<Music>>() {
@@ -99,7 +151,7 @@ public class MusicRepository {
 
     public ArrayList<Music> getCurrentMusicsList() {
         ArrayList<Music> result = new ArrayList();
-        mSharedPreferences = getSharedPreferences();
+        mSharedPreferences = getSharedPreferences(PREF_ALL_CURRENT_MUSICS_LIST);
         Gson gson = new Gson();
         String json = mSharedPreferences.getString(PREF_ALL_CURRENT_MUSICS_LIST,
                 null);
@@ -145,7 +197,7 @@ public class MusicRepository {
         return albumListUnDuplicate;
     }
 
-     public HashMap<String, ArrayList<Music>> getArtists() {
+    public HashMap<String, ArrayList<Music>> getArtists() {
         ArrayList<Music> musicArrayList = getAllMusicsList();
         HashMap<String, ArrayList<Music>> artistHashMap = new HashMap<>();
         ArrayList<String> unDuplicateArtistNameList =
@@ -180,33 +232,44 @@ public class MusicRepository {
     }
 
 
-
-
-
     public int getCurrentMusicIndex() {
-        mSharedPreferences = getSharedPreferences();
+        mSharedPreferences = getSharedPreferences(PREF_CURRENT_MUSIC_INDEX);
         return mSharedPreferences.getInt(PREF_CURRENT_MUSIC_INDEX, -1);
     }
 
     public String getCurrentAlbumName() {
-        mSharedPreferences = getSharedPreferences();
+        mSharedPreferences = getSharedPreferences(PREF_CURRENT_ALBUM_NAME);
         return mSharedPreferences.getString(PREF_CURRENT_ALBUM_NAME, "");
     }
 
     public String getCurrentArtistName() {
-        mSharedPreferences = getSharedPreferences();
+        mSharedPreferences = getSharedPreferences(PREF_CURRENT_ARTIST_NAME);
         return mSharedPreferences.getString(PREF_CURRENT_ARTIST_NAME, "");
     }
 
-    private SharedPreferences getSharedPreferences() {
-        return mContext.getSharedPreferences(PREF_STORAGE, Context.MODE_PRIVATE);
+    private SharedPreferences getSharedPreferences(String name) {
+        return mContext.getSharedPreferences(name, Context.MODE_PRIVATE);
     }
 
     public void clearCashedAllMusicsList() {
-        mSharedPreferences = getSharedPreferences();
-        Editor editor = mSharedPreferences.edit();
-        editor.clear();
-        editor.commit();
+        ArrayList<SharedPreferences>
+                sharedPreferencesArrayList = new ArrayList<>();
+        sharedPreferencesArrayList.add(getSharedPreferences(PREF_CURRENT_MUSIC_INDEX));
+        sharedPreferencesArrayList.add(getSharedPreferences(PREF_CURRENT_ALBUM_NAME));
+        sharedPreferencesArrayList.add(getSharedPreferences(PREF_CURRENT_ARTIST_NAME));
+        sharedPreferencesArrayList.add(getSharedPreferences(PREF_ALL_CURRENT_MUSICS_LIST));
+        sharedPreferencesArrayList.add(getSharedPreferences(PREF_SHUFFLE_STATE));
+        sharedPreferencesArrayList.add(getSharedPreferences(PREF_REPEAT_STATE));
+        sharedPreferencesArrayList.add(getSharedPreferences(PREF_SERVICE_BOUND));
+        sharedPreferencesArrayList.add(getSharedPreferences(PREF_PLAY_PAUSE_STATE));
+
+        for (int i = 0; i < sharedPreferencesArrayList.size(); i++) {
+
+            Editor editor = mSharedPreferences.edit();
+            editor.clear();
+            editor.commit();
+        }
+
     }
 
 }

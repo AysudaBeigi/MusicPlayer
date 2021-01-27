@@ -72,7 +72,7 @@
         </androidx.appcompat.widget.AppCompatSeekBar>
 
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/text_view_time_come_through"
+            android:id="@+id/text_view_duration_played"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/seekbar_playing"
@@ -108,7 +108,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
-            app:srcCompat="@drawable/shuffle" />
+            app:srcCompat="@drawable/shuffle_off" />
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -128,14 +128,14 @@
             app:srcCompat="@drawable/previous"
             android:layout_alignParentStart="true" />
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/image_view_play_pause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/image_view_play_pause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
 
-            android:layout_centerHorizontal="true"
+                android:layout_centerHorizontal="true"
 
-            app:srcCompat="@drawable/play" />
+                app:srcCompat="@drawable/pause" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/image_view_next"
@@ -146,13 +146,14 @@
             android:layout_alignParentEnd="true" />
 
     </RelativeLayout>
+
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/image_view_repeat"
             android:layout_width="24dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            app:srcCompat="@drawable/repeat2" />
+            app:srcCompat="@drawable/repeat_off" />
     </RelativeLayout>
 
 

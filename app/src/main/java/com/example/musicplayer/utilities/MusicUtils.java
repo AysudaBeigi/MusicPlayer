@@ -10,6 +10,8 @@ import androidx.annotation.RequiresApi;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.GlideException;
+import com.example.musicplayer.model.Music;
+import com.example.musicplayer.repository.MusicRepository;
 import com.google.android.material.imageview.ShapeableImageView;
 
 public class MusicUtils {
@@ -35,6 +37,9 @@ public class MusicUtils {
                 asBitmap().
                 load(bitmap).
                 into(imageView);
+    }
+    public  static int getRandomMMusicIndex(int maxIndex) {
+        return (int) (Math.random() * (maxIndex+ 1));
     }
 
 }
