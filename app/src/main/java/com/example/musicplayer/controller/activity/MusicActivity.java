@@ -38,7 +38,7 @@ public class MusicActivity extends AppCompatActivity {
     private ShapeableImageView mImageViewRepeat;
     private ShapeableImageView mImageViewShuffle;
     private ShapeableImageView mImageViewCover;
-    private AppCompatSeekBar mAppCompatSeekBar;
+    private AppCompatSeekBar mSeekBar;
     private MusicRepository mMusicRepository;
     private MaterialTextView mTextViewTitle;
     private MaterialTextView mTextViewArtist;
@@ -50,6 +50,18 @@ public class MusicActivity extends AppCompatActivity {
     private int mCurrentMusicIndex;
     private boolean mServiceBound;
     private Handler mSeekbarUpdateHandler = new Handler();
+    private Runnable mUpdateSeekBar = new Runnable() {
+        @Override
+        public void run() {
+            int currentPosition = mMusicPlayerService.
+                    getMediaCurrentPosition() / 1000;
+            mSeekBar.setProgress(currentPosition);
+            mTextViewDurationPlayed.
+                    setText(SeekbarUtils.getProgressTimeFormat(currentPosition));
+            mSeekbarUpdateHandler.postDelayed(this, 1000);
+        }
+
+    };
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, MusicActivity.class);
@@ -95,7 +107,7 @@ public class MusicActivity extends AppCompatActivity {
 
 
     private void setListeners() {
-        mAppCompatSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (mMusicPlayerService != null && fromUser) {
@@ -196,9 +208,9 @@ public class MusicActivity extends AppCompatActivity {
         mTextViewDuration.setText(SeekbarUtils.getProgressTimeFormat(duration));
         if (mMusicPlayerService != null) {
 
-            mAppCompatSeekBar.setMax(mMusicPlayerService.getMediaDuration() / 1000);
+            mSeekBar.setMax(mMusicPlayerService.getMediaDuration() / 1000);
             int currentPosition = mMusicPlayerService.getMediaCurrentPosition() / 1000;
-            mAppCompatSeekBar.setProgress(currentPosition);
+            mSeekBar.setProgress(currentPosition);
             mTextViewDurationPlayed.
                     setText(SeekbarUtils.getProgressTimeFormat(currentPosition));
         }
@@ -221,7 +233,7 @@ public class MusicActivity extends AppCompatActivity {
         mTextViewDuration = findViewById(R.id.text_view_duration);
         mTextViewDurationPlayed = findViewById(R.id.text_view_duration_played);
         mImageViewCover = findViewById(R.id.image_view_cover);
-        mAppCompatSeekBar = findViewById(R.id.seekbar_playing);
+        mSeekBar = findViewById(R.id.seekbar_playing);
         mImageViewNext = findViewById(R.id.image_view_next);
         mImageViewPlayPause = findViewById(R.id.image_view_play_pause);
         mImageViewPrevious = findViewById(R.id.image_view_previouse);
@@ -242,20 +254,11 @@ public class MusicActivity extends AppCompatActivity {
             mMusicRepository.setServiceBound(true);
 
             initViews();
+            mSeekbarUpdateHandler.postDelayed(mUpdateSeekBar, 1000);
 
-            Runnable mUpdateSeekbar = new Runnable() {
-                @Override
-                public void run() {
-                    int mCurrentPosition = mMusicPlayerService.
-                            getMediaCurrentPosition()/1000;
-                    mAppCompatSeekBar.setProgress(mCurrentPosition);
-                    mTextViewDurationPlayed.
-                            setText(SeekbarUtils.getProgressTimeFormat(mCurrentPosition));
-                    mSeekbarUpdateHandler.postDelayed(this, 1000);
-                }
 
-            };
         }
+
 
         @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
@@ -265,7 +268,6 @@ public class MusicActivity extends AppCompatActivity {
             mMusicRepository.setServiceBound(false);
         }
     };
-
 
 }
 
