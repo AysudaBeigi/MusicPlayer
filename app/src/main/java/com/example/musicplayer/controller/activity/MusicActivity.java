@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
@@ -47,7 +48,8 @@ public class MusicActivity extends AppCompatActivity {
     private ArrayList<Music> mCurrentMusicArrayList;
     private Music mActiveMusic;
     private int mCurrentMusicIndex;
-    private boolean mServiceBound = false;
+    private boolean mServiceBound;
+    private Handler mSeekbarUpdateHandler = new Handler();
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, MusicActivity.class);
@@ -79,7 +81,6 @@ public class MusicActivity extends AppCompatActivity {
         Log.d(PagerActivity.TAG, "MusicActivity : onStart ");
         Intent serviceIntent = MusicPlayerService.newIntent(this);
         bindService(serviceIntent, mServiceConnection, BIND_AUTO_CREATE);
-        // initViews();
 
         super.onStart();
 
@@ -193,12 +194,14 @@ public class MusicActivity extends AppCompatActivity {
         mTextViewTitle.setText(mActiveMusic.getTitle());
         int duration = Integer.parseInt(mActiveMusic.getDuration()) / 1000;
         mTextViewDuration.setText(SeekbarUtils.getProgressTimeFormat(duration));
-        mAppCompatSeekBar.setMax(mMusicPlayerService.getMediaDuration() / 1000);
-        Log.d(PagerActivity.TAG, "mMusicPlayerService is not null ");
-        int currentPosition = mMusicPlayerService.getMediaCurrentPosition() / 1000;
-        mAppCompatSeekBar.setProgress(currentPosition);
-        mTextViewDurationPlayed.
-                setText(SeekbarUtils.getProgressTimeFormat(currentPosition));
+        if (mMusicPlayerService != null) {
+
+            mAppCompatSeekBar.setMax(mMusicPlayerService.getMediaDuration() / 1000);
+            int currentPosition = mMusicPlayerService.getMediaCurrentPosition() / 1000;
+            mAppCompatSeekBar.setProgress(currentPosition);
+            mTextViewDurationPlayed.
+                    setText(SeekbarUtils.getProgressTimeFormat(currentPosition));
+        }
 
 
     }
@@ -240,6 +243,18 @@ public class MusicActivity extends AppCompatActivity {
 
             initViews();
 
+            Runnable mUpdateSeekbar = new Runnable() {
+                @Override
+                public void run() {
+                    int mCurrentPosition = mMusicPlayerService.
+                            getMediaCurrentPosition()/1000;
+                    mAppCompatSeekBar.setProgress(mCurrentPosition);
+                    mTextViewDurationPlayed.
+                            setText(SeekbarUtils.getProgressTimeFormat(mCurrentPosition));
+                    mSeekbarUpdateHandler.postDelayed(this, 1000);
+                }
+
+            };
         }
 
         @RequiresApi(api = Build.VERSION_CODES.O)
