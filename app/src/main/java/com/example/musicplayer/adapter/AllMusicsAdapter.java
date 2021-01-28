@@ -88,12 +88,12 @@ public class AllMusicsAdapter extends Adapter<AllMusicsAdapter.AllMusicsHolder> 
 
             mPosition = position;
             mTextViewTitle.setText(mAllMusicsList.get(position).getTitle());
-            byte[] coverBitmap = MusicUtils.
+            byte[] coverByteArray = MusicUtils.
                     retrieveCover(mAllMusicsList.get(position).getData());
-            if (coverBitmap != null) {
+            if (coverByteArray != null) {
                 Glide.with(mContext)
                         .asBitmap()
-                        .load(coverBitmap)
+                        .load(coverByteArray)
                         .into(mImageViewMusicItem);
 
             }

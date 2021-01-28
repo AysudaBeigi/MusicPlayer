@@ -1,5 +1,7 @@
 package com.example.musicplayer.model;
 
+import com.example.musicplayer.service.MusicPlayerService;
+
 import java.io.Serializable;
 
 public class Music implements Serializable {

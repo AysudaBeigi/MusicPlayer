@@ -30,7 +30,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.musicplayer.R;
-import com.example.musicplayer.controller.activity.MusicActivity;
 import com.example.musicplayer.controller.activity.PagerActivity;
 import com.example.musicplayer.model.Music;
 import com.example.musicplayer.model.PlaybackState;
@@ -54,14 +53,17 @@ public class MusicPlayerService extends Service implements
     public static final String ACTION_PREVIOUS = "com.example.musicplayer.ACTION_PREVIOUS";
     public static final String ACTION_NEXT = "com.example.musicplayer.ACTION_NEXT";
     public static final String ACTION_STOP = "com.example.musicplayer.ACTION_STOP";
-    private static final int NOTIFICATION_ID = 100;
+    private static final int NOTIFICATION_ID = 300;
     public static final int NEXT = 100;
     public static final int PREVIOUS = 200;
+    public static final int REQUEST_CODE_PLAY = 0;
+    public static final int REQUEST_CODE_PAUSE = 1;
+    public static final int REQUEST_CODE_NEXT = 2;
+    public static final int REQUEST_CODE_PREVIOUS = 3;
     private final IBinder mIBinder = new LocalBinder();
     private MediaPlayer mMediaPlayer;
     private AudioManager mAudioManager;
     private AudioFocusRequest mFocusRequest;
-    //private Handler mHandler=new Handler();
     private PhoneStateListener mPhoneStateListener;
     private TelephonyManager mTelephonyManager;
     private ArrayList<Music> mCurrentMusicArrayList;
@@ -69,10 +71,11 @@ public class MusicPlayerService extends Service implements
     private MediaSessionManager mMediaSessionManager;
     private MediaSessionCompat mMediaSession;
     private MediaControllerCompat.TransportControls mTransportControls;
-    private int mCurrentMusicIndex = -1;
+    private int mCurrentMusicIndex;
     private int mResumePosition;
     private boolean mOngoingCall = false;
     private MusicRepository mMusicRepository;
+    private BecomingNoisyReceiver mBecomingNoisyReceiver;
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, MusicPlayerService.class);
@@ -83,7 +86,8 @@ public class MusicPlayerService extends Service implements
     public void onCreate() {
         super.onCreate();
         Log.d(ERROR_TAG, "onCreate MediaPlayerService");
-        // callStateListener();
+        callStateListener();
+        registerBecomingNoisyReceiver();
     }
 
 
@@ -111,7 +115,6 @@ public class MusicPlayerService extends Service implements
             mMusicRepository = MusicRepository.getInstance(getApplicationContext());
             mCurrentMusicArrayList = mMusicRepository.getCurrentMusicsList();
             mCurrentMusicIndex = mMusicRepository.getCurrentMusicIndex();
-
             mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
 
 
@@ -131,7 +134,7 @@ public class MusicPlayerService extends Service implements
                 e.printStackTrace();
                 stopSelf();
             }
-            buildNotification(PlaybackState.PLAYING);
+            createAndShowNotification(PlaybackState.PLAYING);
         }
 
         initMediaPLayer();
@@ -154,7 +157,6 @@ public class MusicPlayerService extends Service implements
 
     }
 
-
     public void seekMedia(int progress) {
         mMediaPlayer.seekTo(progress);
     }
@@ -162,7 +164,8 @@ public class MusicPlayerService extends Service implements
     public int getMediaCurrentPosition() {
         return mMediaPlayer.getCurrentPosition();
     }
-    public int getMediaDuration(){
+
+    public int getMediaDuration() {
         return mMediaPlayer.getDuration();
     }
 
@@ -225,12 +228,12 @@ public class MusicPlayerService extends Service implements
 
     public void onPlay() {
         resumeMedia();
-        buildNotification(PlaybackState.PLAYING);
+        createAndShowNotification(PlaybackState.PLAYING);
     }
 
     public void onPause() {
         pauseMedia();
-        buildNotification(PlaybackState.PAUSED);
+        createAndShowNotification(PlaybackState.PAUSED);
 
     }
 
@@ -238,7 +241,7 @@ public class MusicPlayerService extends Service implements
 
         skipToNext();
         updateMetaData();
-        buildNotification(PlaybackState.PLAYING);
+        createAndShowNotification(PlaybackState.PLAYING);
 
     }
 
@@ -246,22 +249,21 @@ public class MusicPlayerService extends Service implements
 
         skipToPrevious();
         updateMetaData();
-        buildNotification(PlaybackState.PLAYING);
+        createAndShowNotification(PlaybackState.PLAYING);
 
     }
-
-    /*private class BecomingNoisyReceiver extends BroadcastReceiver {
+    private class BecomingNoisyReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             pauseMedia();
-            buildNotification(PlaybackState.PAUSED);
+            createAndShowNotification(PlaybackState.PAUSED);
 
         }
     }
-*/;
 
-   /* private void registerBecomingNoisyReceiver() {
+
+    private void registerBecomingNoisyReceiver() {
         Log.d(ERROR_TAG, " registerBecomingNoisyReceiver");
 
         mBecomingNoisyReceiver = new BecomingNoisyReceiver();
@@ -270,8 +272,6 @@ public class MusicPlayerService extends Service implements
         registerReceiver(mBecomingNoisyReceiver, intentFilter);
 
     }
-*/
-
 
     private void initMediaSession() throws RemoteException {
         Log.d(PagerActivity.TAG, "initMediaSession");
@@ -298,7 +298,7 @@ public class MusicPlayerService extends Service implements
 
                 super.onPlay();
                 resumeMedia();
-                buildNotification(PlaybackState.PLAYING);
+                createAndShowNotification(PlaybackState.PLAYING);
             }
 
             @Override
@@ -307,7 +307,7 @@ public class MusicPlayerService extends Service implements
 
                 super.onPause();
                 pauseMedia();
-                buildNotification(PlaybackState.PAUSED);
+                createAndShowNotification(PlaybackState.PAUSED);
 
             }
 
@@ -349,15 +349,26 @@ public class MusicPlayerService extends Service implements
     private void updateMetaData() {
         Log.d(PagerActivity.TAG, "updateMetaData ");
 
-        Bitmap albumArt = BitmapFactory.decodeResource(getResources(),
-                R.drawable.violon);
+        Bitmap coverBitmap = getCoverBitmap();
         mMediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
+                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, coverBitmap)
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, mActiveMusic.getArtist())
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, mActiveMusic.getAlbum())
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, mActiveMusic.getTitle())
                 .build());
 
+    }
+
+    private Bitmap getCoverBitmap() {
+        Bitmap coverBitmap;
+        byte[] coverByteArray = MusicUtils.retrieveCover(mActiveMusic.getData());
+        if (coverByteArray != null)
+            coverBitmap = BitmapFactory.decodeByteArray(coverByteArray,
+                    0, coverByteArray.length);
+        else
+            coverBitmap = BitmapFactory.decodeResource(getResources(),
+                    R.drawable.violon);
+        return coverBitmap;
     }
 
     private void skipToNext() {
@@ -380,7 +391,7 @@ public class MusicPlayerService extends Service implements
         } else {
 
             switch (nextPrevious) {
-                case 100://next
+                case NEXT:
                     if (mCurrentMusicIndex == mCurrentMusicArrayList.size() - 1) {
                         mCurrentMusicIndex = 0;
                         mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
@@ -388,7 +399,7 @@ public class MusicPlayerService extends Service implements
                         mActiveMusic = mCurrentMusicArrayList.get(++mCurrentMusicIndex);
                     }
                     break;
-                case 200://prevois
+                case PREVIOUS:
                     if (mCurrentMusicIndex == 0) {
                         mCurrentMusicIndex = mCurrentMusicArrayList.size() - 1;
                         mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
@@ -411,22 +422,20 @@ public class MusicPlayerService extends Service implements
     }
 
 
-    private void buildNotification(PlaybackState playbackState) {
+    private void createAndShowNotification(PlaybackState playbackState) {
         Log.d(PagerActivity.TAG, "buildNotification");
         int notificationAction = android.R.drawable.ic_media_pause;
         PendingIntent playPauseAction = null;
         if (playbackState == PlaybackState.PLAYING) {
             notificationAction = android.R.drawable.ic_media_pause;
-            playPauseAction = playbackAction(1);
+            playPauseAction = playbackAction(REQUEST_CODE_PAUSE);
         } else if (playbackState == PlaybackState.PAUSED) {
             notificationAction = android.R.drawable.ic_media_play;
-            playPauseAction = playbackAction(0);
+            playPauseAction = playbackAction(REQUEST_CODE_PLAY);
         }
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),
-                R.drawable.violon);
+        Bitmap largeIcon =getCoverBitmap();
         NotificationManagerCompat notificationManagerCompat =
                 NotificationManagerCompat.from(this);
-
 
         Notification notification =
                 new NotificationCompat.Builder(
@@ -437,7 +446,6 @@ public class MusicPlayerService extends Service implements
                                 new androidx.media.app.NotificationCompat.
                                         MediaStyle().
                                         setMediaSession(mMediaSession.getSessionToken())
-
                                         .setShowActionsInCompactView(0, 1, 2))
                         .setColor(getResources().getColor(R.color.orange_00))
                         .setLargeIcon(largeIcon)
@@ -446,11 +454,11 @@ public class MusicPlayerService extends Service implements
                         .setContentTitle(mActiveMusic.getAlbum())
                         .setContentInfo(mActiveMusic.getTitle())
                         .addAction(android.R.drawable.ic_media_previous,
-                                "previous", playbackAction(3))
+                                "previous", playbackAction(REQUEST_CODE_PREVIOUS))
                         .addAction(notificationAction, "pause",
                                 playPauseAction)
                         .addAction(android.R.drawable.ic_media_next, "next",
-                                playbackAction(2))
+                                playbackAction(REQUEST_CODE_NEXT))
                         .build();
 
         notificationManagerCompat.notify(NOTIFICATION_ID, notification);
@@ -471,27 +479,23 @@ public class MusicPlayerService extends Service implements
         Intent playbackAction =
                 new Intent(this, MusicPlayerService.class);
         switch (requestCode) {
-            case 0:
-                // Play
+            case REQUEST_CODE_PLAY:
                 playbackAction.setAction(ACTION_PLAY);
                 return PendingIntent.getService(this,
                         requestCode,
                         playbackAction,
                         0);
-            case 1:
-                // Pause
+            case REQUEST_CODE_PAUSE:
                 playbackAction.setAction(ACTION_PAUSE);
                 return PendingIntent.getService(this,
                         requestCode, playbackAction, 0);
 
-            case 2:
-                // Next track
+            case REQUEST_CODE_NEXT:
                 playbackAction.setAction(ACTION_NEXT);
                 return PendingIntent.getService(this,
                         requestCode, playbackAction,
                         0);
-            case 3:
-                // Previous track
+            case REQUEST_CODE_PREVIOUS:
                 playbackAction.setAction(ACTION_PREVIOUS);
                 return PendingIntent.getService(this,
                         requestCode,
@@ -520,6 +524,7 @@ public class MusicPlayerService extends Service implements
         } else if (actionString.equalsIgnoreCase(ACTION_STOP)) {
             mTransportControls.stop();
         }
+
     }
 
     @Override
@@ -536,9 +541,9 @@ public class MusicPlayerService extends Service implements
             mTelephonyManager.listen(mPhoneStateListener,
                     PhoneStateListener.LISTEN_NONE);
         }
-
+        unregisterReceiver(mBecomingNoisyReceiver);
         removeNotification();
-        MusicRepository.getInstance(getApplicationContext()).clearCashedAllMusicsList();
+        mMusicRepository.clearCashedAllMusicsList();
 
     }
 
@@ -638,7 +643,7 @@ public class MusicPlayerService extends Service implements
                 .setAudioAttributes(MusicUtils.buildAudioAttributes())
                 .setAcceptsDelayedFocusGain(true)
                 .setWillPauseWhenDucked(true)
-                .setOnAudioFocusChangeListener(this)//setAcceptsDelayedFocusGain
+                .setOnAudioFocusChangeListener(this)
                 .build();
 
     }

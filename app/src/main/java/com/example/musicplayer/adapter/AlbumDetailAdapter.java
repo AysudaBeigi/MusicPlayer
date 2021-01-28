@@ -47,7 +47,7 @@ public class AlbumDetailAdapter extends
     @Override
     public void onBindViewHolder(@NonNull AlbumDetailHolder holder, int position) {
 
-        holder.binItemViews(position);
+        holder.bindItemViews(position);
     }
 
     @Override
@@ -80,13 +80,13 @@ public class AlbumDetailAdapter extends
             mTextViewTitleMusicItem = itemView.findViewById(R.id.text_view_title_music_item);
         }
 
-        private void binItemViews(int position) {
+        private void bindItemViews(int position) {
             mPosition = position;
             mTextViewTitleMusicItem.setText(mAlbumMusicsArrayList.get(position).getTitle());
-            byte[] coverBitmap = MusicUtils.
+            byte[] coverByteArray = MusicUtils.
                     retrieveCover(mAlbumMusicsArrayList.get(position).getData());
-            if (coverBitmap != null)
-                MusicUtils.setCover(mContext, coverBitmap, mImageViewMusicItem);
+            if (coverByteArray != null)
+                MusicUtils.setCover(mContext, coverByteArray, mImageViewMusicItem);
 
         }
     }
