@@ -27,6 +27,7 @@ public class MusicRepository {
     public static final String PREF_REPEAT_STATE = "prefRepeatState";
     public static final String PREF_SERVICE_BOUND = "prefServiceBound";
     public static final String PREF_PLAY_PAUSE_STATE = "prefPlayPauseState";
+    public static final String PREF_ACTIVE_MUSIC = "prefActiveMusic";
     private SharedPreferences mSharedPreferences;
     private Context mContext;
     private static MusicRepository sInstance;
@@ -65,9 +66,28 @@ public class MusicRepository {
     }
 
     public void setCurrentMusicIndex(int currentMusicIndex) {
+
         getSharedPreferences(PREF_CURRENT_MUSIC_INDEX).edit().
                 putInt(PREF_CURRENT_MUSIC_INDEX, currentMusicIndex)
                 .apply();
+
+    }
+
+    public void setActiveMusic(Music activeMusic) {
+        Gson gson = new Gson();
+        String json = gson.toJson(activeMusic);
+        getSharedPreferences(PREF_ACTIVE_MUSIC).edit().
+                putString(PREF_ACTIVE_MUSIC, json)
+                .apply();
+
+    }
+    public Music getActiveMusic(){
+        Gson gson = new Gson();
+        String json = getSharedPreferences(PREF_ACTIVE_MUSIC).
+                getString(PREF_ACTIVE_MUSIC, null);
+        Type type = new TypeToken<Music>() {
+        }.getType();
+        return gson.fromJson(json, type);
 
     }
 
@@ -109,6 +129,7 @@ public class MusicRepository {
         mSharedPreferences = getSharedPreferences(PREF_REPEAT_STATE);
         return mSharedPreferences.getBoolean(PREF_REPEAT_STATE, false);
     }
+
     public void setServiceBound(boolean state) {
         mSharedPreferences = getSharedPreferences(PREF_SERVICE_BOUND);
         mSharedPreferences.edit().putBoolean(PREF_SERVICE_BOUND, state)
@@ -120,20 +141,18 @@ public class MusicRepository {
         mSharedPreferences = getSharedPreferences(PREF_SERVICE_BOUND);
         return mSharedPreferences.getBoolean(PREF_SERVICE_BOUND, false);
     }
-     public void setPlayPauseSate(String state) {
+
+    public void setPlayPauseSate(String state) {
         mSharedPreferences = getSharedPreferences(PREF_PLAY_PAUSE_STATE);
         mSharedPreferences.edit().putString(PREF_PLAY_PAUSE_STATE, state)
                 .apply();
 
     }
 
-    public String  getPlayPauseSate() {
+    public String getPlayPauseSate() {
         mSharedPreferences = getSharedPreferences(PREF_PLAY_PAUSE_STATE);
         return mSharedPreferences.getString(PREF_PLAY_PAUSE_STATE, "play");
     }
-
-
-
 
 
     public ArrayList<Music> getAllMusicsList() {
@@ -150,7 +169,7 @@ public class MusicRepository {
     }
 
     public ArrayList<Music> getCurrentMusicsList() {
-        ArrayList<Music> result = new ArrayList();
+        ArrayList<Music> result =new ArrayList<Music>() ;
         mSharedPreferences = getSharedPreferences(PREF_ALL_CURRENT_MUSICS_LIST);
         Gson gson = new Gson();
         String json = mSharedPreferences.getString(PREF_ALL_CURRENT_MUSICS_LIST,
@@ -262,6 +281,7 @@ public class MusicRepository {
         sharedPreferencesArrayList.add(getSharedPreferences(PREF_REPEAT_STATE));
         sharedPreferencesArrayList.add(getSharedPreferences(PREF_SERVICE_BOUND));
         sharedPreferencesArrayList.add(getSharedPreferences(PREF_PLAY_PAUSE_STATE));
+        sharedPreferencesArrayList.add(getSharedPreferences(PREF_ACTIVE_MUSIC));
 
         for (int i = 0; i < sharedPreferencesArrayList.size(); i++) {
 

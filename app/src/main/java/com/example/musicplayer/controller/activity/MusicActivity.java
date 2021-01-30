@@ -45,10 +45,11 @@ public class MusicActivity extends AppCompatActivity {
     private MaterialTextView mTextViewDuration;
     private MaterialTextView mTextViewDurationPlayed;
     private MusicPlayerService mMusicPlayerService;
-    private ArrayList<Music> mCurrentMusicArrayList;
-    private Music mActiveMusic;
+    private ArrayList<Music> mCurrentMusicsList;
     private int mCurrentMusicIndex;
+    private Music mActiveMusic;
     private boolean mServiceBound;
+    private boolean mFirstInit=true;
     private Handler mSeekbarUpdateHandler = new Handler();
     private Runnable mUpdateSeekBar = new Runnable() {
         @Override
@@ -85,7 +86,7 @@ public class MusicActivity extends AppCompatActivity {
 
     private void resetPlayPauseState() {
         mMusicRepository.setPlayPauseSate("play");
-        mImageViewPlayPause.setImageResource(R.drawable.pause);
+        mImageViewPlayPause.setImageResource(R.drawable.pause_2);
     }
 
     @Override
@@ -131,7 +132,7 @@ public class MusicActivity extends AppCompatActivity {
                 if (mMusicRepository.getShuffleState()) {
                     setShufflePlayState(false, R.drawable.shuffle_off);
                 } else {
-                    setShufflePlayState(true, R.drawable.shufffle_on);
+                    setShufflePlayState(true, R.drawable.shuffle_on);
                 }
             }
 
@@ -147,7 +148,7 @@ public class MusicActivity extends AppCompatActivity {
                 if (mMusicRepository.getRepeatState()) {
                     setRepeatPlayState(false, R.drawable.repeat_off);
                 } else {
-                    setRepeatPlayState(true, R.drawable.repeat_on);
+                    setRepeatPlayState(true, R.drawable.repeat_one_on);
                 }
             }
 
@@ -162,6 +163,8 @@ public class MusicActivity extends AppCompatActivity {
                 mMusicPlayerService.nextMediaPlay();
                 initViews();
             }
+
+
         });
         mImageViewPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,18 +181,19 @@ public class MusicActivity extends AppCompatActivity {
                 if (mMusicRepository.getPlayPauseSate().equals("play")) {
                     Log.d(PagerActivity.TAG, "state is play");
                     mMusicRepository.setPlayPauseSate("pause");
-                    mImageViewPlayPause.setImageResource(R.drawable.play);
+                    mImageViewPlayPause.setImageResource(R.drawable.play_2);
                     mMusicPlayerService.onPause();
                 } else {
                     Log.d(PagerActivity.TAG, "state is pause");
 
                     mMusicRepository.setPlayPauseSate("play");
-                    mImageViewPlayPause.setImageResource(R.drawable.pause);
+                    mImageViewPlayPause.setImageResource(R.drawable.pause_2);
                     mMusicPlayerService.onPlay();
                 }
             }
         });
     }
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -201,7 +205,7 @@ public class MusicActivity extends AppCompatActivity {
         if (coverBitmap != null)
             MusicUtils.setCover(this, coverBitmap, mImageViewCover);
         else
-            mImageViewCover.setImageResource(R.drawable.violon);
+            mImageViewCover.setImageResource(R.drawable.violon10);
         mTextViewArtist.setText(mActiveMusic.getArtist());
         mTextViewTitle.setText(mActiveMusic.getTitle());
         int duration = Integer.parseInt(mActiveMusic.getDuration()) / 1000;
@@ -220,9 +224,15 @@ public class MusicActivity extends AppCompatActivity {
 
     private void initData() {
         mServiceBound = mMusicRepository.getServiceBound();
-        mCurrentMusicArrayList = mMusicRepository.getCurrentMusicsList();
-        mCurrentMusicIndex = mMusicRepository.getCurrentMusicIndex();
-        mActiveMusic = mCurrentMusicArrayList.get(mCurrentMusicIndex);
+        mCurrentMusicIndex=mMusicRepository.getCurrentMusicIndex();
+       // if(mFirstInit){
+            mActiveMusic=mMusicRepository.getCurrentMusicsList().get(mCurrentMusicIndex);
+            mFirstInit=false;
+       // }
+       /*else {
+        mActiveMusic = mMusicRepository.getActiveMusic();
+
+        }*/
     }
 
 
@@ -236,7 +246,7 @@ public class MusicActivity extends AppCompatActivity {
         mSeekBar = findViewById(R.id.seekbar_playing);
         mImageViewNext = findViewById(R.id.image_view_next);
         mImageViewPlayPause = findViewById(R.id.image_view_play_pause);
-        mImageViewPrevious = findViewById(R.id.image_view_previouse);
+        mImageViewPrevious = findViewById(R.id.image_view_prev);
         mImageViewShuffle = findViewById(R.id.image_view_shuffle);
         mImageViewRepeat = findViewById(R.id.image_view_repeat);
     }

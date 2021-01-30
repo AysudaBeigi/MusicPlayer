@@ -17,7 +17,7 @@ public class MusicPlayerApplication  extends Application {
             String channelId=getString(R.string.channel_id);
             String channelName=getString(R.string.channel_name);
             String description=getString(R.string.description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel notificationChannel=new NotificationChannel(
                     channelId,
                     channelName,

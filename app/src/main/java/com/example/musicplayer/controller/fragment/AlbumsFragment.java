@@ -1,5 +1,6 @@
 package com.example.musicplayer.controller.fragment;
 
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -55,8 +56,24 @@ public class AlbumsFragment extends Fragment {
         mRecyclerViewAlbums.
                 setLayoutManager(new GridLayoutManager(
                         getActivity(),2));
+
         AlbumsAdapter albumsAdapter=new AlbumsAdapter(getActivity());
         mRecyclerViewAlbums.setAdapter(albumsAdapter);
+    }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mRecyclerViewAlbums.
+                    setLayoutManager(new GridLayoutManager(
+                            getActivity(),3));
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            mRecyclerViewAlbums.
+                    setLayoutManager(new GridLayoutManager(
+                            getActivity(),2));
+
+        }
     }
 
     private void findViews(View view) {

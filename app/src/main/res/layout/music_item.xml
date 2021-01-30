@@ -10,18 +10,21 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/image_view_music_item"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        app:srcCompat="@drawable/music" />
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:srcCompat="@drawable/music"
+        android:layout_alignParentLeft="true" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/text_view_title_music_item"
         android:layout_width="fill_parent"
-        android:layout_height="72dp"
-        android:layout_margin="2dp"
-        android:layout_toEndOf="@+id/image_view_music_item"
+        android:layout_height="56dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginLeft="2dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="2dp"
+        android:layout_marginRight="2dp"
+        android:layout_marginBottom="2dp"
         android:layout_toRightOf="@+id/image_view_music_item"
         android:gravity="left|center_vertical"
         android:paddingLeft="2dp"
